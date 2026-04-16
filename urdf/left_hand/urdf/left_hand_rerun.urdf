@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="left_hand">
+  <link name="left_wrist">
+    <inertial>
+      <mass value="0.300"/>
+      <inertia ixx="0.00025" ixy="0" ixz="0" iyy="0.00025" iyz="0" izz="0.00025"/>
+    </inertial>
+    <visual name="left_wrist_visual">
+      <origin xyz="0 0 0" rpy="-3.14159 -0.139626 0.2618"/>
+      <geometry>
+        <mesh filename="package://left_hand/meshes/stl/wrist_left.stl" scale="0.1 0.1 0.1"/>
+      </geometry>
+      <material name="left_wrist_mat">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- THUMB -->
+  <link name="left_thumb_cmc0">
+    <inertial>
+      <mass value="0.0040"/>
+      <inertia ixx="0.0000015" ixy="0" ixz="0" iyy="0.0000015" iyz="0" izz="0.0000015"/>
+    </inertial>
+    <visual name="left_thumb_cmc0_visual">
+      <origin xyz="0.0 -0.00000000 -0.00000000" rpy="3.14159265 0.0 0.00000000"/>
+      <geometry>
+        
+        <mesh filename="package://left_hand/meshes/stl/thumb_cmc0.stl" scale="0.1 0.1 0.1"/>
+      </geometry>
+      <material name="left_thumb_cmc0_mat">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+  <joint name="left_thumb_cmc0" type="revolute">
+    <parent link="left_wrist"/>
+    <child link="left_thumb_cmc0"/>
+    <origin xyz="0.01506930 0.0 -0.02249652" rpy="1.04722625 0.78742966 0.44483422"/>
+    <axis xyz="0 0 -1"/>
+    <limit lower="-0.80" upper="0.80" effort="2.0" velocity="6.0"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+
+  <link name="left_thumb_cmc1_dummy">
+    <inertial>
+      <mass value="0.0001"/>
+      <inertia ixx="0.000000001" ixy="0" ixz="0" iyy="0.000000001" iyz="0" izz="0.000000001"/>
+    </inertial>
+  </link>
+  <joint name="left_thumb_cmc1_x" type="revolute">
+    <parent link="left_thumb_cmc0"/>
+    <child link="left_thumb_cmc1_dummy"/>
+    <origin xyz="0.01485256 -0.00000000 -0.00000000" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-0.70" upper="0.70" effort="2.0" velocity="6.0"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+
+  <link name="left_thumb_cmc1">
+    <inertial>
+      <mass value="0.0100"/>
+      <inertia ixx="0.0000040" ixy="0" ixz="0" iyy="0.0000040" iyz="0" izz="0.0000040"/>
+    </inertial>
+    <visual name="left_thumb_cmc1_visual">
+      <origin xyz="0.0 -0.00000000 -0.00000000" rpy="-3.14159265 0.0 0.0872665"/>
+      <geometry>
+        <mesh filename="package://left_hand/meshes/stl/thumb_cmc1.stl" scale="0.1 0.1 0.1"/>
+      </geometry>
+      <material name="left_thumb_cmc1_mat">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+  <joint name="left_thumb_cmc1_y" type="revolute">
+    <parent link="left_thumb_cmc1_dummy"/>
+    <child link="left_thumb_cmc1"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.52" upper="0.52" effort="1.4" velocity="6.0"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+
+  <link name="left_thumb_mcp">
+    <inertial>
+      <mass value="0.0080"/>
+      <inertia ixx="0.0000030" ixy="0" ixz="0" iyy="0.0000030" iyz="0" izz="0.0000030"/>
+    </inertial>
+    <visual name="left_thumb_mcp_visual">
+      <origin xyz="0.0 -0.00000000 -0.00000000" rpy="3.14159265 0.00000000 -0.0872665"/>
+      <geometry>
+        
+        <mesh filename="package://left_hand/meshes/stl/thumb_mcp.stl" scale="0.1 0.1 0.1"/>
+      </geometry>
+      <material name="left_thumb_mcp_mat">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+  <joint name="left_thumb_mcp" type="revolute">
+    <parent link="left_thumb_cmc1"/>
+    <child link="left_thumb_mcp"/>
+    <origin xyz="0.04651291 -0.00000000 -0.00000000" rpy="0 0 0"/>
+    <axis xyz="0 0 -1"/>
+    <limit lower="-1.60" upper="0.20" effort="1.6" velocity="7.0"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+
+  <link name="left_thumb_ip">
+    <inertial>
+      <mass value="0.0040"/>
+      <inertia ixx="0.0000012" ixy="0" ixz="0" iyy="0.0000012" iyz="0" izz="0.0000012"/>
+    </inertial>
+    <visual name="left_thumb_ip_visual">
+      <origin xyz="0.0 -0.00000000 -0.00000000" rpy="3.14159265 0.00000000 -0.0872665"/>
+      <geometry>
+        
+        <mesh filename="package://left_hand/meshes/stl/thumb_ip.stl" scale="0.1 0.1 0.1"/>
+      </geometry>
+      <material name="left_thumb_ip_mat">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+  <joint name="left_thumb_ip" type="revolute">
+    <parent link="left_thumb_mcp"/>
+    <child link="left_thumb_ip"/>
+    <origin xyz="0.03079309 -0.00000000 -0.00000000" rpy="0 0 0"/>
+    <axis xyz="0 0 -1"/>
+    <limit lower="-1.50" upper="0.20" effort="1.6" velocity="6.0"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+
+  <!-- INDEX -->
+  <link name="left_index_mcp">
+    <inertial>
+      <mass value="0.0100"/>
+      <inertia ixx="0.0000040" ixy="0" ixz="0" iyy="0.0000040" iyz="0" izz="0.0000040"/>
+    </inertial>
+    <visual name="left_index_mcp_visual">
+      <origin xyz="0.0 -0.00000000 -0.00000000" rpy="3.14159 0 0.00000000"/>
+      <geometry>
+        
+        <mesh filename="package://left_hand/meshes/stl/index_mcp.stl" scale="0.1 0.1 0.1"/>
+      </geometry>
+      <material name="left_index_mcp_mat">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+  <link name="left_index_mcp_dummy">
+    <inertial>
+      <mass value="0.0001"/>
+      <inertia ixx="0.000000001" ixy="0" ixz="0" iyy="0.000000001" iyz="0" izz="0.000000001"/>
+    </inertial>
+  </link>
+  <joint name="left_index_mcp_z" type="revolute">
+    <parent link="left_wrist"/>
+    <child link="left_index_mcp_dummy"/>
+    <origin xyz="0.09399624 0.00731645 -0.02355068" rpy="0 0 0"/>
+    <axis xyz="0 0 -1"/>
+    <limit lower="-2.0944" upper="0.35" effort="1.4" velocity="6.0"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+  <joint name="left_index_mcp_y" type="revolute">
+    <parent link="left_index_mcp_dummy"/>
+    <child link="left_index_mcp"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.52" upper="0.52" effort="1.4" velocity="6.0"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+
+  <link name="left_index_pip">
+    <inertial>
+      <mass value="0.0080"/>
+      <inertia ixx="0.0000030" ixy="0" ixz="0" iyy="0.0000030" iyz="0" izz="0.0000030"/>
+    </inertial>
+    <visual name="left_index_pip_visual">
+      <origin xyz="0.0 -0.00000000 -0.00000000" rpy="3.14159 0 -0.349066"/>
+      <geometry>
+        
+        <mesh filename="package://left_hand/meshes/stl/index_pip.stl" scale="0.1 0.1 0.1"/>
+      </geometry>
+      <material name="left_index_pip_mat">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+  <joint name="left_index_pip" type="revolute">
+    <parent link="left_index_mcp"/>
+    <child link="left_index_pip"/>
+    <origin xyz="0.03792730 -0.00000000 -0.00000000" rpy="0 0 0"/>
+    <axis xyz="0 0 -1"/>
+    <limit lower="-1.60" upper="0.20" effort="1.6" velocity="7.0"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+
+  <link name="left_index_dip">
+    <inertial>
+      <mass value="0.0060"/>
+      <inertia ixx="0.0000020" ixy="0" ixz="0" iyy="0.0000020" iyz="0" izz="0.0000020"/>
+    </inertial>
+    <visual name="left_index_dip_visual">
+      <origin xyz="0.0 -0.00000000 -0.00000000" rpy="3.14159 0 -0.523599"/>
+      <geometry>
+        
+        <mesh filename="package://left_hand/meshes/stl/index_dip.stl" scale="0.1 0.1 0.1"/>
+      </geometry>
+      <material name="left_index_dip_mat">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+  <joint name="left_index_dip" type="revolute">
+    <parent link="left_index_pip"/>
+    <child link="left_index_dip"/>
+    <origin xyz="0.02430364 -0.00000000 -0.00000000" rpy="0 0 0"/>
+    <axis xyz="0 0 -1"/>
+    <limit lower="-1.75" upper="0.10" effort="1.4" velocity="7.0"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+
+  <!-- MIDDLE -->
+  <link name="left_middle_mcp">
+    <inertial>
+      <mass value="0.0100"/>
+      <inertia ixx="0.0000040" ixy="0" ixz="0" iyy="0.0000040" iyz="0" izz="0.0000040"/>
+    </inertial>
+    <visual name="left_middle_mcp_visual">
+      <origin xyz="0.0 -0.00000000 -0.00000000" rpy="3.14159 0 -0.1396"/>
+      <geometry>
+        
+        <mesh filename="package://left_hand/meshes/stl/middle_mcp.stl" scale="0.1 0.1 0.1"/>
+      </geometry>
+      <material name="left_middle_mcp_mat">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+  <link name="left_middle_mcp_dummy">
+    <inertial>
+      <mass value="0.0001"/>
+      <inertia ixx="0.000000001" ixy="0" ixz="0" iyy="0.000000001" iyz="0" izz="0.000000001"/>
+    </inertial>
+  </link>
+  <joint name="left_middle_mcp_z" type="revolute">
+    <parent link="left_wrist"/>
+    <child link="left_middle_mcp_dummy"/>
+    <origin xyz="0.09364660 0.00254315 -0.00172591" rpy="0 0 0"/>
+    <axis xyz="0 0 -1"/>
+    <limit lower="-2.0944" upper="0.35" effort="1.4" velocity="6.0"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+  <joint name="left_middle_mcp_y" type="revolute">
+    <parent link="left_middle_mcp_dummy"/>
+    <child link="left_middle_mcp"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.52" upper="0.52" effort="1.4" velocity="6.0"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+
+  <link name="left_middle_pip">
+    <inertial>
+      <mass value="0.0080"/>
+      <inertia ixx="0.0000030" ixy="0" ixz="0" iyy="0.0000030" iyz="0" izz="0.0000030"/>
+    </inertial>
+    <visual name="left_middle_pip_visual">
+      <origin xyz="0.0 -0.00000000 -0.00000000" rpy="3.14159 0 -0.2618"/>
+      <geometry>
+        
+        <mesh filename="package://left_hand/meshes/stl/middle_pip.stl" scale="0.1 0.1 0.1"/>
+      </geometry>
+      <material name="left_middle_pip_mat">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+  <joint name="left_middle_pip" type="revolute">
+    <parent link="left_middle_mcp"/>
+    <child link="left_middle_pip"/>
+    <origin xyz="0.04292699 -0.00000000 -0.00000000" rpy="0 0 0"/>
+    <axis xyz="0 0 -1"/>
+    <limit lower="-1.60" upper="0.20" effort="1.6" velocity="7.0"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+
+  <link name="left_middle_dip">
+    <inertial>
+      <mass value="0.0060"/>
+      <inertia ixx="0.0000020" ixy="0" ixz="0" iyy="0.0000020" iyz="0" izz="0.0000020"/>
+    </inertial>
+    <visual name="left_middle_dip_visual">
+      <origin xyz="0.0 -0.00000000 -0.00000000" rpy="3.14159 0 -0.0"/>
+      <geometry>
+        
+        <mesh filename="package://left_hand/meshes/stl/middle_dip.stl" scale="0.1 0.1 0.1"/>
+      </geometry>
+      <material name="left_middle_dip_mat">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+  <joint name="left_middle_dip" type="revolute">
+    <parent link="left_middle_pip"/>
+    <child link="left_middle_dip"/>
+    <origin xyz="0.02754958 -0.00000000 -0.00000000" rpy="0 0 0"/>
+    <axis xyz="0 0 -1"/>
+    <limit lower="-1.75" upper="0.10" effort="1.4" velocity="7.0"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+
+  <!-- RING -->
+  <link name="left_ring_mcp">
+    <inertial>
+      <mass value="0.0100"/>
+      <inertia ixx="0.0000040" ixy="0" ixz="0" iyy="0.0000040" iyz="0" izz="0.0000040"/>
+    </inertial>
+    <visual name="left_ring_mcp_visual">
+      <origin xyz="0.0 -0.00000000 -0.00000000" rpy="3.14159 0 -0.0872665"/>
+      <geometry>
+        
+        <mesh filename="package://left_hand/meshes/stl/ring_mcp.stl" scale="0.1 0.1 0.1"/>
+      </geometry>
+      <material name="left_ring_mcp_mat">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+  <link name="left_ring_mcp_dummy">
+    <inertial>
+      <mass value="0.0001"/>
+      <inertia ixx="0.000000001" ixy="0" ixz="0" iyy="0.000000001" iyz="0" izz="0.000000001"/>
+    </inertial>
+  </link>
+  <joint name="left_ring_mcp_z" type="revolute">
+    <parent link="left_wrist"/>
+    <child link="left_ring_mcp_dummy"/>
+    <origin xyz="0.08669379 0.00652931 0.01746524" rpy="0 0 0"/>
+    <axis xyz="0 0 -1"/>
+    <limit lower="-2.0944" upper="0.35" effort="1.4" velocity="6.0"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+  <joint name="left_ring_mcp_y" type="revolute">
+    <parent link="left_ring_mcp_dummy"/>
+    <child link="left_ring_mcp"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.52" upper="0.52" effort="1.4" velocity="6.0"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+
+  <link name="left_ring_pip">
+    <inertial>
+      <mass value="0.0080"/>
+      <inertia ixx="0.0000030" ixy="0" ixz="0" iyy="0.0000030" iyz="0" izz="0.0000030"/>
+    </inertial>
+    <visual name="left_ring_pip_visual">
+      <origin xyz="0.0 -0.00000000 -0.00000000" rpy="3.14159 0 0.04363325"/>
+      <geometry>
+        
+        <mesh filename="package://left_hand/meshes/stl/ring_pip.stl" scale="0.1 0.1 0.1"/>
+      </geometry>
+      <material name="left_ring_pip_mat">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+  <joint name="left_ring_pip" type="revolute">
+    <parent link="left_ring_mcp"/>
+    <child link="left_ring_pip"/>
+    <origin xyz="0.03899610 -0.00000000 -0.00000000" rpy="0 0 0"/>
+    <axis xyz="0 0 -1"/>
+    <limit lower="-1.60" upper="0.20" effort="1.6" velocity="7.0"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+
+  <link name="left_ring_dip">
+    <inertial>
+      <mass value="0.0060"/>
+      <inertia ixx="0.0000020" ixy="0" ixz="0" iyy="0.0000020" iyz="0" izz="0.0000020"/>
+    </inertial>
+    <visual name="left_ring_dip_visual">
+      <origin xyz="0.0 -0.00000000 -0.00000000" rpy="3.14159 0 -0.0"/>
+      <geometry>
+        
+        <mesh filename="package://left_hand/meshes/stl/ring_dip.stl" scale="0.1 0.1 0.1"/>
+      </geometry>
+      <material name="left_ring_dip_mat">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+  <joint name="left_ring_dip" type="revolute">
+    <parent link="left_ring_pip"/>
+    <child link="left_ring_dip"/>
+    <origin xyz="0.02657340 -0.00000000 -0.00000000" rpy="0 0 0"/>
+    <axis xyz="0 0 -1"/>
+    <limit lower="-1.75" upper="0.10" effort="1.4" velocity="7.0"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+
+  <!-- PINKY -->
+  <link name="left_pinky_cmc">
+    <inertial>
+      <mass value="0.0040"/>
+      <inertia ixx="0.0000015" ixy="0" ixz="0" iyy="0.0000015" iyz="0" izz="0.0000015"/>
+    </inertial>
+  </link>
+  <joint name="left_pinky_0" type="fixed">
+    <parent link="left_wrist"/>
+    <child link="left_pinky_cmc"/>
+    <origin xyz="0.03407356 0.00941983 0.02299857" rpy="0 0 0"/>
+  </joint>
+
+  <link name="left_pinky_mcp">
+    <inertial>
+      <mass value="0.0100"/>
+      <inertia ixx="0.0000040" ixy="0" ixz="0" iyy="0.0000040" iyz="0" izz="0.0000040"/>
+    </inertial>
+    <visual name="left_pinky_mcp_visual">
+      <origin xyz="0.0 -0.00000000 -0.00000000" rpy="3.14159 0 0.00000000"/>
+      <geometry>
+        
+        <mesh filename="package://left_hand/meshes/stl/pinky_mcp.stl" scale="0.1 0.1 0.1"/>
+      </geometry>
+      <material name="left_pinky_mcp_mat">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+  <link name="left_pinky_mcp_dummy">
+    <inertial>
+      <mass value="0.0001"/>
+      <inertia ixx="0.000000001" ixy="0" ixz="0" iyy="0.000000001" iyz="0" izz="0.000000001"/>
+    </inertial>
+  </link>
+  <joint name="left_pinky_mcp_z" type="revolute">
+    <parent link="left_pinky_cmc"/>
+    <child link="left_pinky_mcp_dummy"/>
+    <origin xyz="0.04172644 0.00438017 0.01230143" rpy="0 0.0 0"/>
+    <axis xyz="0 0 -1"/>
+    <limit lower="-2.0944" upper="0.60" effort="1.4" velocity="6.0"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+  <joint name="left_pinky_mcp_y" type="revolute">
+    <parent link="left_pinky_mcp_dummy"/>
+    <child link="left_pinky_mcp"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.52" upper="0.52" effort="1.4" velocity="6.0"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+
+  <link name="left_pinky_pip">
+    <inertial>
+      <mass value="0.0080"/>
+      <inertia ixx="0.0000030" ixy="0" ixz="0" iyy="0.0000030" iyz="0" izz="0.0000030"/>
+    </inertial>
+    <visual name="left_pinky_pip_visual">
+      <origin xyz="0.0 -0.00000000 -0.00000000" rpy="3.14159 0 -0.261799"/>
+      <geometry>
+        
+        <mesh filename="package://left_hand/meshes/stl/pinky_pip.stl" scale="0.1 0.1 0.1"/>
+      </geometry>
+      <material name="left_pinky_pip_mat">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+  <joint name="left_pinky_pip" type="revolute">
+    <parent link="left_pinky_mcp"/>
+    <child link="left_pinky_pip"/>
+    <origin xyz="0.03072041 -0.00000000 -0.00000000" rpy="0 0 0"/>
+    <axis xyz="0 0 -1"/>
+    <limit lower="-1.60" upper="0.20" effort="1.6" velocity="7.0"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+
+  <link name="left_pinky_dip">
+    <inertial>
+      <mass value="0.0060"/>
+      <inertia ixx="0.0000020" ixy="0" ixz="0" iyy="0.0000020" iyz="0" izz="0.0000020"/>
+    </inertial>
+    <visual name="left_pinky_dip_visual">
+      <origin xyz="0.0 -0.00000000 -0.00000000" rpy="3.14159 0 -0.436332"/>
+      <geometry>
+        
+        <mesh filename="package://left_hand/meshes/stl/pinky_dip.stl" scale="0.1 0.1 0.1"/>
+      </geometry>
+      <material name="left_pinky_dip_mat">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+  <joint name="left_pinky_dip" type="revolute">
+    <parent link="left_pinky_pip"/>
+    <child link="left_pinky_dip"/>
+    <origin xyz="0.02031138 -0.00000000 -0.00000000" rpy="0 0 0"/>
+    <axis xyz="0 0 -1"/>
+    <limit lower="-1.75" upper="0.10" effort="1.4" velocity="7.0"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+
+</robot>

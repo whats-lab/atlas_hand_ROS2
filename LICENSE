@@ -1,0 +1,205 @@
+# 주식회사 왓츠랩 소스 코드 라이선스
+# WHATs LAB Corp Source Code License
+
+**기반 라이선스 / Based on:** Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)
+**버전 / Version:** 1.0
+**발효일 / Effective Date:** 2026년 04월 05일 / March 05, 2026
+**저작권자 / Copyright Holder:** 주식회사 왓츠랩 (WHATs LAB Corp)
+
+---
+
+## 한국어 전문
+
+### 저작권 고지
+
+본 소프트웨어 및 관련 소스 코드, 문서, 데이터(이하 "저작물")에 대한 모든 저작권은 주식회사 왓츠랩(이하 "저작권자")에 귀속됩니다.
+
+Copyright © 주식회사 왓츠랩. All rights reserved.
+
+---
+
+### 제1조 (정의)
+
+1. **"저작물"**이란 본 저장소(Repository)에 포함된 모든 소스 코드, 문서, 데이터, 바이너리 파일 및 그 파생물을 의미합니다.
+2. **"이용자"**란 본 라이선스 조건에 따라 저작물을 이용하는 모든 자연인 또는 법인을 의미합니다.
+3. **"영리적 목적"**이란 직간접적으로 금전적 이익, 상업적 이익 또는 경제적 가치를 추구하거나, 제3자에게 저작물 또는 그 파생물을 유·무상으로 제공하는 행위를 포함합니다.
+4. **"기여(Contribution)"**란 이용자가 공식 GitHub 저장소를 통해 Pull Request를 제출하고, 저작권자의 검토 및 승인을 거쳐 병합(Merge)된 코드, 문서 또는 데이터의 수정 및 추가를 의미합니다.
+5. **"공식 저장소"**란 저작권자가 운영하는 GitHub 저장소를 의미합니다.
+
+---
+
+### 제2조 (허용 행위)
+
+저작권자는 이용자에게 다음 행위를 무상으로 허용합니다.
+
+1. **복제 및 열람**: 개인적·내부적 연구 및 개발 목적으로 저작물을 복제하고 열람하는 행위.
+2. **연구 및 개발 목적 사용**: 학술 연구, 기술 평가, 내부 프로토타이핑 등 비영리적 연구·개발 목적으로 저작물을 실행하고 활용하는 행위.
+3. **출처 표시 후 인용**: 학술 논문, 기술 보고서 등에서 출처를 명확히 표시하고 저작물의 일부를 인용하는 행위.
+4. **공식 기여**: 공식 저장소에 Pull Request를 제출하는 방식으로 저작물에 수정, 개선, 버그 수정을 제안하는 행위. 단, 기여자는 제5조에 따른 기여자 동의에 구속됩니다.
+
+---
+
+### 제3조 (금지 행위)
+
+이용자는 다음 행위를 할 수 없습니다.
+
+1. **영리적 이용**: 직간접적으로 영리적 목적으로 저작물을 이용하거나, 저작물을 기반으로 한 제품·서비스를 제공·판매·임대하는 행위.
+2. **제3자 제공**: 저작권자의 서면 승인 없이 저작물 또는 그 일부를 제3자에게 유·무상으로 배포, 공유, 재배포하는 행위.
+3. **미승인 수정 및 파생물 배포**: 공식 기여 절차(Pull Request)를 거치지 않은 수정본, 개조본, 파생 저작물을 배포하거나 공개적으로 사용하는 행위.
+4. **역공학 및 특허 우회**: 저작물을 역공학(Reverse Engineering)하거나, 저작권자의 지식재산권을 우회하려는 목적으로 저작물을 분석하는 행위.
+5. **상표 사용**: 저작권자의 명시적 서면 허가 없이 저작권자의 상호, 상표, 로고를 사용하는 행위.
+6. **승인 관계 사칭**: 저작권자와 공식적으로 제휴·승인 관계에 있는 것처럼 오인시키는 행위.
+
+---
+
+### 제4조 (출처 표시 의무)
+
+제2조에 따른 허용 행위를 수행하는 경우, 이용자는 반드시 다음 정보를 명시해야 합니다.
+
+- 저작물명 및 저작권자: **주식회사 왓츠랩 (WHATs LAB Corp)**
+- 공식 저장소 URL
+- 본 라이선스가 적용됨을 표시
+- 원본 저작물의 수정 여부 명시
+
+---
+
+### 제5조 (기여자 동의)
+
+공식 저장소에 Pull Request를 제출함으로써, 기여자는 다음 사항에 동의한 것으로 간주합니다.
+
+1. 기여자는 해당 기여물에 대한 저작권을 보유하거나, 이를 기여할 법적 권한을 가지고 있음을 보증합니다.
+2. 기여자는 저작권자에게 해당 기여물을 본 저작물에 포함하고, 본 라이선스 또는 저작권자가 추후 선택하는 조건 하에 이용할 수 있는 **비독점적, 전 세계적, 영구적, 취소 불가능한 무상 라이선스**를 부여합니다.
+3. 기여가 병합되더라도 기여자에게 별도의 보상은 발생하지 않습니다.
+4. 저작권자는 Pull Request를 검토하고 병합 여부를 단독으로 결정할 권리를 보유합니다.
+
+---
+
+### 제6조 (보증의 부인)
+
+저작물은 "있는 그대로(AS-IS)" 제공되며, 저작권자는 저작물의 상품성, 특정 목적에의 적합성, 비침해성에 대한 어떠한 명시적·묵시적 보증도 하지 않습니다.
+
+---
+
+### 제7조 (책임의 제한)
+
+관련 법령이 허용하는 최대 범위 내에서, 저작권자는 저작물의 이용으로 인해 발생하는 직접적, 간접적, 우발적, 특별적, 징벌적 또는 결과적 손해에 대해 책임을 지지 않습니다.
+
+---
+
+### 제8조 (라이선스 종료)
+
+이용자가 본 라이선스의 어느 조항이라도 위반하는 경우, 본 라이선스에 따른 이용 권한은 자동으로 즉시 종료됩니다. 라이선스 종료 시 이용자는 저작물의 모든 복사본을 즉시 삭제해야 합니다.
+
+---
+
+### 제9조 (준거법 및 분쟁 해결)
+
+본 라이선스는 대한민국 법률에 따라 해석되고 적용됩니다. 본 라이선스와 관련된 분쟁은 서울중앙지방법원을 제1심 전속 관할 법원으로 합니다.
+
+---
+
+### 제10조 (전체 합의)
+
+본 라이선스는 저작물 이용에 관한 저작권자와 이용자 간의 전체 합의를 구성하며, 이에 관한 모든 이전의 합의, 표명, 약정을 대체합니다.
+
+---
+---
+
+## ENGLISH VERSION (Full Text)
+
+### Copyright Notice
+
+All copyright in this software and related source code, documentation, and data (collectively, the "Work") is owned by WHATs LAB Corp (the "Licensor").
+
+Copyright © WHATs LAB Corp All rights reserved.
+
+---
+
+### Article 1 — Definitions
+
+1. **"Work"** means all source code, documentation, data, binary files, and derivatives thereof contained in this Repository.
+2. **"Licensee"** means any natural person or legal entity exercising rights under this License.
+3. **"Commercial Purpose"** means any activity that directly or indirectly pursues monetary gain, commercial advantage, or economic value, including providing, selling, or licensing the Work or derivative works to any third party, whether for compensation or not.
+4. **"Contribution"** means any modification, addition, or correction to the Work submitted by a Licensee via a Pull Request to the Official Repository, which has been reviewed and merged by the Licensor.
+5. **"Official Repository"** means the GitHub repository operated and maintained by the Licensor.
+
+---
+
+### Article 2 — Permitted Uses
+
+The Licensor hereby grants the Licensee, free of charge, permission to:
+
+1. **Reproduce and View**: Copy and view the Work for personal or internal research and development purposes.
+2. **Use for Research and Development**: Execute and use the Work for non-commercial research and development purposes, including academic research, technical evaluation, and internal prototyping.
+3. **Quote with Attribution**: Quote portions of the Work in academic papers, technical reports, or similar publications, provided that clear attribution is given.
+4. **Contribute Officially**: Propose modifications, improvements, or bug fixes to the Work by submitting Pull Requests to the Official Repository. Contributors are subject to Article 5 (Contributor Agreement).
+
+---
+
+### Article 3 — Prohibited Uses
+
+The Licensee shall not:
+
+1. **Use for Commercial Purposes**: Use the Work, directly or indirectly, for any Commercial Purpose, or offer, sell, or license any product or service based on the Work.
+2. **Distribute to Third Parties**: Distribute, share, or redistribute the Work or any portion thereof to any third party, with or without compensation, without the express written consent of the Licensor.
+3. **Distribute Unauthorized Modifications**: Distribute, publish, or publicly use any modified, adapted, or derivative version of the Work that has not been merged into the Official Repository through the official Contribution process.
+4. **Reverse Engineer**: Reverse engineer, decompile, or disassemble the Work, or analyze the Work for the purpose of circumventing the Licensor's intellectual property rights.
+5. **Use Trademarks**: Use the Licensor's trade name, trademarks, or logos without the express prior written permission of the Licensor.
+6. **Misrepresent Affiliation**: Misrepresent or imply any official partnership, endorsement, or affiliation with the Licensor.
+
+---
+
+### Article 4 — Attribution Requirements
+
+When exercising any Permitted Use under Article 2, the Licensee must clearly provide:
+
+- The name of the Work and the copyright holder: **WHATs LAB Corp (주식회사 왓츠랩)**
+- The URL of the Official Repository
+- A statement that this License applies to the Work
+- A statement of whether the Work has been modified from the original
+
+---
+
+### Article 5 — Contributor Agreement
+
+By submitting a Pull Request to the Official Repository, a contributor ("Contributor") agrees to the following:
+
+1. The Contributor represents and warrants that they hold copyright in the Contribution, or otherwise have the legal right to make the Contribution.
+2. The Contributor hereby grants to the Licensor a **non-exclusive, worldwide, perpetual, irrevocable, royalty-free license** to incorporate, use, modify, sublicense, and distribute the Contribution as part of the Work under this License or any other terms the Licensor may elect.
+3. No compensation shall be due to the Contributor for any merged Contribution.
+4. The Licensor retains the sole and absolute right to review and decide whether to merge any Pull Request.
+
+---
+
+### Article 6 — Disclaimer of Warranties
+
+THE WORK IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. THE LICENSOR MAKES NO WARRANTY THAT THE WORK IS ERROR-FREE OR WILL MEET THE LICENSEE'S REQUIREMENTS.
+
+---
+
+### Article 7 — Limitation of Liability
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL THE LICENSOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, LOSS OF PROFITS, LOSS OF DATA, OR BUSINESS INTERRUPTION) ARISING OUT OF OR IN CONNECTION WITH THE USE OR INABILITY TO USE THE WORK, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+---
+
+### Article 8 — Termination
+
+This License and the rights granted hereunder will terminate automatically and immediately upon any breach by the Licensee of any term of this License. Upon termination, the Licensee must immediately delete all copies of the Work in their possession.
+
+---
+
+### Article 9 — Governing Law and Jurisdiction
+
+This License shall be governed by and construed in accordance with the laws of the Republic of Korea, without regard to its conflict of law provisions. Any dispute arising out of or relating to this License shall be subject to the exclusive jurisdiction of the Seoul Central District Court as the court of first instance.
+
+---
+
+### Article 10 — Entire Agreement
+
+This License constitutes the entire agreement between the Licensor and the Licensee with respect to the use of the Work and supersedes all prior agreements, representations, and understandings relating thereto.
+
+---
+
+*Based on Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0), with additional terms for software and contributions.*
+*CC BY-NC-ND 4.0 기반, 소프트웨어 및 기여 관련 추가 조항 포함.*

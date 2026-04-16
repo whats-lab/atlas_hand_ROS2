@@ -1,0 +1,7 @@
+numpy<2.0
+scipy
+dex-retargeting
+pin
+rerun-sdk>=0.15.0
+pyarrow>=14.0.2
+python-osc
