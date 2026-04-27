@@ -21,8 +21,6 @@ case "$1" in
 
   enter)
     CONTAINER="atlas_hand_dev"
-
-    fi
     
     if docker ps -q -f name="^${CONTAINER}$" | grep -q .; then
       docker exec -it \
