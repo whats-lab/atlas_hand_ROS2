@@ -20,19 +20,26 @@ Pinocchio 기반 Forward Kinematics → dex-retargeting IK 파이프라인으로
 ## 시스템 아키텍처
 
 ```
-[Air Glove Atlas]
-  /left/quat/get   — float×68 (17관절×4)
-  /right/quat/get  — float×68 (17관절×4)
-        │ 
-        ▼
-┌─────────────────────┐
-│    osc_receiver     │  
-└─────────────────────┘
-        │
-  /left_hand/quaternions   (Float32MultiArray, 68 floats)
-  /right_hand/quaternions  (Float32MultiArray, 68 floats)
-        │
-        ▼
+[Air Glove Atlas 디바이스]
+  OSC 수신 (/left/quat/get, /right/quat/get)
+  OSC 수신 (/device/status/get, /heartbeat/get)
+  OSC 수신 (/left/hapt/ret/get, /right/hapt/ret/get)  ← 햅틱 ACK
+  OSC 수신 (/device/alarm/get)
+        │ ▲
+        │ │  OSC 송신 (/left/hapt/set, /right/hapt/set)  ← 햅틱 명령
+        │ │  OSC 송신 (/device/status/get "4")            ← 하트비트
+        ▼ │
+┌──────────────────────────────────────────┐
+│               osc_receiver               │
+│  - 쿼터니언 수신 → ROS 2 발행             │
+│  - 연결 상태 추적 → Bool 발행             │
+│  - 햅틱 토픽 구독 → OSC 전송             │
+└──────────────────────────────────────────┘
+        │                   ▲
+        │   ROS 2 Topics    │   ROS 2 Topics
+        │  (quaternions,    │   (haptic 명령)
+        │   connected)      │
+        ▼               [다른 노드]
 ┌────────────────────────────────────────────┐
 │               retarget (노드)               │
 │  1. FK  — Pinocchio spherical joint        │
@@ -42,11 +49,13 @@ Pinocchio 기반 Forward Kinematics → dex-retargeting IK 파이프라인으로
 │  5. Low-pass Filter                        │
 └────────────────────────────────────────────┘
         │
-  /joint_states  (sensor_msgs/JointState)
-        │
+        │   ROS 2 Topics
+        │   (joint_states)
         ▼
   [Robot Hand]
 ```
+
+> ROS 2 토픽 상세: [readme/topics.md](readme/topics.md)
 
 ---
 
@@ -190,24 +199,6 @@ ros2 run atlas_hand visualizer left connect  # 외부 뷰어 연결
 ros2 launch atlas_hand left_hand_view.launch.py
 ros2 launch atlas_hand right_hand_view.launch.py
 ```
----
-
-## 토픽
-
-| 토픽                      | 타입                         | 발행 노드    |
-| ------------------------- | ---------------------------- | ------------ |
-| `/left_hand/quaternions`  | `std_msgs/Float32MultiArray` | osc_receiver |
-| `/right_hand/quaternions` | `std_msgs/Float32MultiArray` | osc_receiver |
-| `/joint_states`           | `sensor_msgs/JointState`     | retarget     |
-
-### 데이터 포맷
-
-```
-Float32MultiArray.data (68 floats):
-  [x0,y0,z0,w0, x1,y1,z1,w1, ..., x16,y16,z16,w16]
-  sensor[0] = 손목  /  sensor[1~16] = 관절 (JOINT_ORDER 순서)
-```
-
 ---
 
 ## 주요 파라미터
