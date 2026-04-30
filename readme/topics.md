@@ -56,7 +56,7 @@ data = [thumb, index, middle, ring, pinky]   # 액추에이터 인덱스 0~4
 ```bash
 # 햅틱은 0단계부터 4단계 까지 있으며 On/Off 방식으로 구현되어있음.
 # 왼손 햅틱 on (thumb=1, index=2, middle=0, ring=3, pinky=0)
-ros2 topic pub -t 1 /left_hand/haptic std_msgs/Int32MultiArray "data: [10, 20, 0, 5, 0]"
+ros2 topic pub -t 1 /left_hand/haptic std_msgs/Int32MultiArray "data: [1, 2, 0, 3, 0]"
 
 # 왼손 햅틱 off
 ros2 topic pub -t 1 /left_hand/haptic/off std_msgs/Empty "{}"
