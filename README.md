@@ -40,17 +40,18 @@ Pinocchio 기반 Forward Kinematics → dex-retargeting IK 파이프라인으로
         │  (quaternions,    │   (haptic 명령)
         │   connected)      │
         ▼               [다른 노드]
-┌────────────────────────────────────────────┐
-│               retarget (노드)               │
-│  1. FK  — Pinocchio spherical joint        │
-│  2. 좌표 변환 — Quest frame → 로봇 frame      │
-│  3. 스케일 보정                              |
-│  4. IK  — dex-retargeting                  │
-│  5. Low-pass Filter                        │
-└────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────┐
+│                        retarget (노드)                          │
+│  1. FK        — Pinocchio spherical joint → 23 joint positions │
+│  2. 좌표 변환 — AGA frame → 로봇 frame (3×3 행렬)               │
+│  3. 스케일 보정 — float 또는 손가락별 List[float]                │
+│  4. Stage 1   — VectorOptimizer (손 방향/형태 정규화)            │
+│  5. Stage 2   — PositionOptimizer (손끝 위치 정밀 보정)          │
+│  6. 손목 직접 매핑 — swing-twist 분해 (설정 시)                  │
+└────────────────────────────────────────────────────────────────┘
         │
-        │   ROS 2 Topics
-        │   (joint_states)
+        │   /joint_states          (sensor_msgs/JointState)
+        │   /{side}_hand/wrist_xyz (std_msgs/Float32MultiArray, 디버그)
         ▼
   [Robot Hand]
 ```
@@ -173,9 +174,9 @@ source install/setup.bash
 export FASTDDS_BUILTIN_TRANSPORTS=UDPv4
 
 ros2 launch atlas_hand atlas_hand.launch.py
-# hand_type: left | right | both (기본값: both)
-#robotis_hx5 : hand_rerun | robotis_hx5 | Can Add (기본값: hand_rerun)
-ros2 launch atlas_hand atlas_hand.launch.py hand_type:=left robot_config:=robotis_hx5
+# hand_type    : left | right | both (기본값: both)
+# robot_config : base | robotis_hx5 | orca_hand (기본값: base)
+ros2 launch atlas_hand atlas_hand.launch.py hand_type:=right robot_config:=orca_hand
 ```
 
 ### 개별 노드
@@ -184,12 +185,16 @@ ros2 launch atlas_hand atlas_hand.launch.py hand_type:=left robot_config:=roboti
 # OSC 수신
 ros2 run atlas_hand osc_receiver
 
-# 리타겟팅 (기본값: 뼈대 URDF hand_rerun)
+# 리타겟팅 (기본값: robot_config=base)
 ros2 run atlas_hand retarget --ros-args -p hand_type:=left
 ros2 run atlas_hand retarget --ros-args -p hand_type:=right
 
 # 특정 로봇 핸드 지정
-ros2 run atlas_hand retarget --ros-args -p hand_type:=left -p robot_config:=robotis_hx5
+ros2 run atlas_hand retarget --ros-args -p hand_type:=right -p robot_config:=orca_hand
+
+# 손목 디버그 토픽 확인 (orca_hand 등 _WRIST_JOINTS 설정 시 발행)
+# data: [raw_x, raw_y, raw_z, raw_w, euler_x, euler_y, euler_z, swing_0, ...]
+ros2 topic echo /right_hand/wrist_xyz
 
 # 3D 시각화 (Rerun)
 ros2 run atlas_hand visualizer left spawn    # 로컬 뷰어(기본값)
@@ -204,13 +209,24 @@ ros2 launch atlas_hand hand_view.launch.py model:=robotis side:=left
 
 ## 주요 파라미터
 
-| 파라미터          | 기본값 | 설명                           |
-| ----------------- | ------ | ------------------------------ |
-| `LP_FILTER_ALPHA` | `0.35` | Low-pass 필터 (0=정지, 1=직통) |
-| `TIMER_SEC`       | `0.02` | 제어 루프 주기 (50 Hz)         |
-| `IK_MAX_TIME`     | `0.01` | IK 최대 계산 시간 (10 ms)      |
+### ROS 파라미터 (`--ros-args -p <param>:=<value>`)
 
-[atlas_hand/nodes/retargeting.py](atlas_hand/nodes/retargeting.py) 상단에서 수정합니다.
+| 파라미터          | 기본값       | 설명                                          |
+| ----------------- | ------------ | --------------------------------------------- |
+| `hand_type`       | `left`       | `left` / `right`                              |
+| `robot_config`    | `base`       | 로봇 설정 키 (`base` / `robotis_hx5` / `orca_hand`) |
+| `vector_weight`   | `1.0`        | Stage 1 시간 비중 (VectorOptimizer)           |
+| `position_weight` | `4.0`        | Stage 2 시간 비중 (PositionOptimizer)         |
+| `tf_parent_frame` | *(wrist link)* | TF parent frame (기본값: wrist 링크명)      |
+
+### 코드 상수 ([atlas_hand/nodes/retargeting.py](atlas_hand/nodes/retargeting.py) 상단)
+
+| 상수            | 기본값  | 설명                                      |
+| --------------- | ------- | ----------------------------------------- |
+| `TIMER_SEC`     | `0.02`  | 제어 루프 주기 (50 Hz)                    |
+| `IK_MAX_TIME`   | `0.02`  | 두 단계 합산 IK 시간 예산 (20 ms)         |
+| `HUBER_DELTA`   | `0.025` | Huber loss δ                              |
+| `NORM_DELTA`    | `0.01`  | Normal loss δ                             |
 
 ---
 
