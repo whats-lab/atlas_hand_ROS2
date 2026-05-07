@@ -25,15 +25,31 @@ class FingerChain:
 ### Human Hand 인덱스 레이아웃
 
 ![손가락 관절 위치](./HandModel_Naming.jpg)
-
-```
- 0 : wrist
- 1 : thumb_0   2 : thumb_1   3 : thumb_2    4 : thumb_3     5 : thumb_tip
- 6 : index_1    7 : index_2    8 : index_3    9 : index_tip
-10 : middle_1  11 : middle_2  12 : middle_3  13 : middle_tip
-14 : ring_1    15 : ring_2    16 : ring_3    17 : ring_tip
-18 : pinky0      19 : pinky_mcp   20 : pinky_2   21 : pinky_3   22 : pinky_tip
-```
+| Index | 관절 명칭 (Bone Name) | 설명 (Description) |
+| :---: | :--- | :--- |
+| **0** | `wrist` | 손목 중심점 (Root) |
+| **1** | `thumb_0` | 엄지 손바닥 쪽 뿌리 (CMC) |
+| **2** | `thumb_1` | 엄지 첫 마디 (MCP) |
+| **3** | `thumb_2` | 엄지 중간 마디 (IP) |
+| **4** | `thumb_3` | 엄지 끝 마디 (Distal) |
+| **5** | `thumb_tip` | **엄지 최종 끝점 (Tip)** |
+| **6** | `index_1` | 검지 뿌리 (MCP) |
+| **7** | `index_2` | 검지 중간 마디 (PIP) |
+| **8** | `index_3` | 검지 끝 마디 (DIP) |
+| **9** | `index_tip` | **검지 최종 끝점 (Tip)** |
+| **10** | `middle_1` | 중지 뿌리 (MCP) |
+| **11** | `middle_2` | 중지 중간 마디 (PIP) |
+| **12** | `middle_3` | 중지 끝 마디 (DIP) |
+| **13** | `middle_tip` | **중지 최종 끝점 (Tip)** |
+| **14** | `ring_1` | 약지 뿌리 (MCP) |
+| **15** | `ring_2` | 약지 중간 마디 (PIP) |
+| **16** | `ring_3` | 약지 끝 마디 (DIP) |
+| **17** | `ring_tip` | **약지 최종 끝점 (Tip)** |
+| **18** | `pinky_0` | 새끼손가락 손바닥 쪽 뿌리 (CMC) |
+| **19** | `pinky_1` | 새끼손가락 뿌리 (MCP) |
+| **20** | `pinky_2` | 새끼손가락 중간 마디 (PIP) |
+| **21** | `pinky_3` | 새끼손가락 끝 마디 (DIP) |
+| **22** | `pinky_tip` | **새끼손가락 최종 끝점 (Tip)** |
 
 ### 플레이스홀더
 
