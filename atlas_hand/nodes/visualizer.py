@@ -41,8 +41,7 @@ class HandVisualizerNode(Node):
             self.get_logger().error(f"Failed to find atlas_hand package share: {e}")
             pkg_share = "."
             
-        urdf_path = os.path.join(pkg_share, 'urdf', f'{self.hand_type}_hand', 'urdf', f'{self.hand_type}_hand_rerun.urdf')
-        mesh_base_dir = os.path.join(pkg_share, 'urdf', f'{self.hand_type}_hand')
+        urdf_path = os.path.join(pkg_share, 'models', 'base', 'urdf', f'{self.hand_type}.urdf')
 
         if not os.path.exists(urdf_path):
             self.get_logger().warn(f"URDF path not found: {urdf_path}")
@@ -50,7 +49,6 @@ class HandVisualizerNode(Node):
         self.viz = HandRerunViz(
             hand_type=self.hand_type,
             urdf_path=urdf_path,
-            mesh_base_dir=mesh_base_dir,
         )
 
         if self.mode != 'off':
