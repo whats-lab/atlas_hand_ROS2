@@ -2,13 +2,13 @@
 HandSphericalFK: Pinocchio spherical joint 기반 Hand FK
 
 - 16개 spherical joint (손목 센서 0 제외)
-- hand_data.json에서 kinematic 구조 로드
+- URDF에서 kinematic 구조 로드
 
 입력 쿼터니언: [x, y, z, w] (scipy 표준)
 """
 
-import json
 import os
+import xml.etree.ElementTree as ET
 
 import numpy as np
 import pinocchio as pin
@@ -64,9 +64,21 @@ def _correct_quat(raw_xyzw: np.ndarray) -> np.ndarray:
     """센서 좌표계 보정"""
     return np.array([raw_xyzw[0], -raw_xyzw[1], -raw_xyzw[2], raw_xyzw[3]])
 
-def build_model(json_path: str, hand_type: str = 'left') -> 'pin.Model':
+def _parse_urdf_joints(urdf_path: str) -> dict:
+    """URDF에서 joint name → xyz 매핑을 파싱."""
+    tree = ET.parse(urdf_path)
+    joints = {}
+    for j in tree.getroot().iter('joint'):
+        origin = j.find('origin')
+        if origin is not None:
+            xyz = [float(v) for v in origin.get('xyz', '0 0 0').split()]
+            joints[j.get('name')] = xyz
+    return joints
+
+
+def build_model(urdf_path: str, hand_type: str = 'left') -> 'pin.Model':
     """
-    hand_data.json으로부터 16개 spherical joint Pinocchio 모델 빌드.
+    URDF로부터 16개 spherical joint Pinocchio 모델 빌드.
 
     구조:
         universe (wrist root)
@@ -81,10 +93,7 @@ def build_model(json_path: str, hand_type: str = 'left') -> 'pin.Model':
         └── {pfx}pinky_mcp   (sensor 14) → {pfx}pinky_pip → {pfx}pinky_dip
     """
 
-    with open(json_path, 'r') as f:
-        raw = json.load(f)
-
-    joints = raw[hand_type]['joints']
+    joints = _parse_urdf_joints(urdf_path)
     pfx = hand_type + '_'
     model = pin.Model()
     UNIVERSE = 0
@@ -103,39 +112,39 @@ def build_model(json_path: str, hand_type: str = 'left') -> 'pin.Model':
             pin.SE3.Identity(),
         )
         return jid
-
+    print(joints)
     # ── Thumb (4 joints + 1 tip) ──────────────────────────────────────────
-    cmc0_id  = add_sph(UNIVERSE, 'thumb_cmc0',  joints[f'{pfx}thumb_cmc0']['xyz'])
-    cmc1_id  = add_sph(cmc0_id,  'thumb_cmc1',  joints[f'{pfx}thumb_cmc1_x']['xyz'])
-    tmcp_id  = add_sph(cmc1_id,  'thumb_mcp',   joints[f'{pfx}thumb_mcp']['xyz'])
-    tip_id   = add_sph(tmcp_id,  'thumb_ip',    joints[f'{pfx}thumb_ip']['xyz'])
-    _        = add_sph(tip_id,   'thumb_tip',   [0.01486, 0.0, 0.0]) # Virtual tip
+    cmc0_id  = add_sph(UNIVERSE, 'thumb_cmc0',  joints[f'{pfx}thumb_cmc0'])
+    cmc1_id  = add_sph(cmc0_id,  'thumb_cmc1',  joints[f'{pfx}thumb_cmc1_x'])
+    tmcp_id  = add_sph(cmc1_id,  'thumb_mcp',   joints[f'{pfx}thumb_mcp'])
+    tip_id   = add_sph(tmcp_id,  'thumb_ip',    joints[f'{pfx}thumb_ip'])
+    _        = add_sph(tip_id,   'thumb_tip',   joints[f'{pfx}thumb_tip']) 
 
     # ── Index (3 joints + 1 tip) ──────────────────────────────────────────
-    imcp_id = add_sph(UNIVERSE, 'index_mcp', joints[f'{pfx}index_mcp_z']['xyz'])
-    ipip_id = add_sph(imcp_id,  'index_pip', joints[f'{pfx}index_pip']['xyz'])
-    idip_id = add_sph(ipip_id,  'index_dip', joints[f'{pfx}index_dip']['xyz'])
-    _       = add_sph(idip_id,  'index_tip', [0.01158, 0.0, 0.0]) # Virtual tip
+    imcp_id = add_sph(UNIVERSE, 'index_mcp', joints[f'{pfx}index_mcp_z'])
+    ipip_id = add_sph(imcp_id,  'index_pip', joints[f'{pfx}index_pip'])
+    idip_id = add_sph(ipip_id,  'index_dip', joints[f'{pfx}index_dip'])
+    _       = add_sph(idip_id,  'index_tip', joints[f'{pfx}index_tip']) 
 
     # ── Middle (3 joints + 1 tip) ─────────────────────────────────────────
-    mmcp_id = add_sph(UNIVERSE, 'middle_mcp', joints[f'{pfx}middle_mcp_z']['xyz'])
-    mpip_id = add_sph(mmcp_id,  'middle_pip', joints[f'{pfx}middle_pip']['xyz'])
-    mdip_id = add_sph(mpip_id,  'middle_dip', joints[f'{pfx}middle_dip']['xyz'])
-    _       = add_sph(mdip_id,  'middle_tip', [0.01220, 0.0, 0.0]) # Virtual tip
+    mmcp_id = add_sph(UNIVERSE, 'middle_mcp', joints[f'{pfx}middle_mcp_z'])
+    mpip_id = add_sph(mmcp_id,  'middle_pip', joints[f'{pfx}middle_pip'])
+    mdip_id = add_sph(mpip_id,  'middle_dip', joints[f'{pfx}middle_dip'])
+    _       = add_sph(mdip_id,  'middle_tip', joints[f'{pfx}middle_tip']) 
 
     # ── Ring (3 joints + 1 tip) ───────────────────────────────────────────
-    rmcp_id = add_sph(UNIVERSE, 'ring_mcp', joints[f'{pfx}ring_mcp_z']['xyz'])
-    rpip_id = add_sph(rmcp_id,  'ring_pip', joints[f'{pfx}ring_pip']['xyz'])
-    rdip_id = add_sph(rpip_id,  'ring_dip', joints[f'{pfx}ring_dip']['xyz'])
-    _       = add_sph(rdip_id,  'ring_tip', [0.01194, 0.0, 0.0]) # Virtual tip
+    rmcp_id = add_sph(UNIVERSE, 'ring_mcp', joints[f'{pfx}ring_mcp_z'])
+    rpip_id = add_sph(rmcp_id,  'ring_pip', joints[f'{pfx}ring_pip'])
+    rdip_id = add_sph(rpip_id,  'ring_dip', joints[f'{pfx}ring_dip'])
+    _       = add_sph(rdip_id,  'ring_tip', joints[f'{pfx}ring_tip']) 
 
     # ── Pinky (3 joints + 1 tip) ──────────────
-    cmc_xyz  = np.array(joints[f'{pfx}pinky_0']['xyz'])
-    pmcp_xyz = np.array(joints[f'{pfx}pinky_mcp_z']['xyz'])
+    cmc_xyz  = np.array(joints[f'{pfx}pinky_0'])
+    pmcp_xyz = np.array(joints[f'{pfx}pinky_mcp_z'])
     pmcp_id  = add_sph(UNIVERSE, 'pinky_mcp', (cmc_xyz + pmcp_xyz).tolist())
-    ppip_id  = add_sph(pmcp_id,  'pinky_pip', joints[f'{pfx}pinky_pip']['xyz'])
-    pdip_id  = add_sph(ppip_id,  'pinky_dip', joints[f'{pfx}pinky_dip']['xyz'])
-    _        = add_sph(pdip_id,  'pinky_tip', [0.01191, 0.0, 0.0]) # Virtual tip
+    ppip_id  = add_sph(pmcp_id,  'pinky_pip', joints[f'{pfx}pinky_pip'])
+    pdip_id  = add_sph(ppip_id,  'pinky_dip', joints[f'{pfx}pinky_dip'])
+    _        = add_sph(pdip_id,  'pinky_tip', joints[f'{pfx}pinky_tip']) 
 
     return model
 
@@ -152,22 +161,19 @@ class HandSphericalFK:
         # rotations: {joint_name: np.ndarray (3,3)} 세계 회전 행렬
     """
 
-    def __init__(self, hand_type: str = 'left', json_path: str = None):
+    def __init__(self, hand_type: str = 'left', urdf_path: str = None):
 
         self.hand_type = hand_type.lower()
         self.pfx = self.hand_type + '_'
 
-        if json_path is None:
-            try:
-                from ament_index_python.packages import get_package_share_directory
-                json_path = os.path.join(
-                    get_package_share_directory('atlas_hand'), 'config', 'hand_data.json'
-                )
-            except Exception:
-                # fallback for non-ROS environments
-                json_path = os.path.join(os.path.dirname(__file__), '..', '..', 'config', 'hand_data.json')
-
-        self.model = build_model(json_path, self.hand_type)
+        if urdf_path is None:
+            from ament_index_python.packages import get_package_share_directory
+            urdf_path = os.path.join(
+                get_package_share_directory('atlas_hand'),
+                'models', 'base', 'urdf', f'{self.hand_type}.urdf',
+            )
+        
+        self.model = build_model(urdf_path, self.hand_type)
         self.data  = self.model.createData()
 
         # joint name → joint id
@@ -277,19 +283,16 @@ class HandRerunViz:
         rr.init("hand_viz", spawn=True)
 
         viz = HandRerunViz(
-            hand_type    = 'left',
-            urdf_path    = '/path/to/left_hand_rerun.urdf',
-            mesh_base_dir= '/path/to/left_hand',
+            hand_type = 'left',
+            urdf_path = '/path/to/models/base/urdf/left.urdf',
         )
         viz.setup()               # 메쉬 한 번 등록 (static)
         viz.update(quats_17)      # 매 프레임 transform 갱신
     """
 
-    def __init__(self, hand_type: str, urdf_path: str, mesh_base_dir: str,
-                 json_path: str = None, entity_prefix: str = 'hand'):
-        self.fk            = HandSphericalFK(hand_type, json_path)
+    def __init__(self, hand_type: str, urdf_path: str, entity_prefix: str = 'hand'):
+        self.fk            = HandSphericalFK(hand_type, urdf_path)
         self.urdf_path     = urdf_path
-        self.mesh_base_dir = mesh_base_dir.rstrip('/')
         self.entity_prefix = entity_prefix
         pfx                = hand_type + '_'
 
@@ -311,7 +314,6 @@ class HandRerunViz:
         """
         try:
             import rerun as rr
-            import xml.etree.ElementTree as ET
         except ImportError as e:
             raise ImportError(f"pip install rerun-sdk: {e}")
 
@@ -354,8 +356,12 @@ class HandRerunViz:
                 continue
 
             filename = mesh_elem.get('filename', '')
-            filename = filename.replace('package://left_hand/',  self.mesh_base_dir + '/')
-            filename = filename.replace('package://right_hand/', self.mesh_base_dir + '/')
+            try:
+                from ament_index_python.packages import get_package_share_directory
+                _pkg_share = get_package_share_directory('atlas_hand')
+            except Exception:
+                _pkg_share = os.path.join(os.path.dirname(__file__), '..', '..')
+            filename = filename.replace('package://atlas_hand/', _pkg_share + '/')
             if not os.path.exists(filename):
                 print(f"[WARN] 메쉬 없음: {filename}")
                 continue
