@@ -253,7 +253,9 @@ class OrcaHandConfig(HandConfig):
         'right': 'R-Carpals_8d1f1041_to_TopTower-Model_4a80d30e',
         'left':  'L-Carpals_719fff8c_to_TopTower-Model_4a80d30e',
     }
-    
+
+    _WRIST_JOINTS    = {'left': {}, 'right': {"R-Carpals_8d1f1041_to_TopTower-Model_4a80d30e" : [-1,0,0]}}
+
 
 
     _FINGERS: ClassVar[Dict[str, List[FingerChain]]] = {
