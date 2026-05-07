@@ -13,7 +13,7 @@ def _collect_data_files(src_dirs):
                 result.append((os.path.join('share', package_name, root), file_list))
     return result
 
-urdf_files = _collect_data_files(['urdf', 'rviz'])
+urdf_files = _collect_data_files(['models', 'rviz'])
 
 setup(
     name=package_name,
@@ -26,9 +26,6 @@ setup(
 
         (os.path.join('share', package_name, 'launch'),
             glob(os.path.join('launch', '*.py'))),
-
-        (os.path.join('share', package_name, 'config'),
-            glob(os.path.join('config', '*.json'))),
     ] + urdf_files,
     install_requires=['setuptools'],
     zip_safe=True,
