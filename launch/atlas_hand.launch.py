@@ -15,7 +15,7 @@ def generate_launch_description():
 
     robot_config_arg = DeclareLaunchArgument(
         'robot_config',
-        default_value='hand_rerun',
+        default_value='base',
         description='로봇 설정',
     )
 
