@@ -24,14 +24,32 @@ class FingerChain:
 
 ### Human Hand 인덱스 레이아웃
 
-```
- 0 : wrist
- 1 : thumb_cmc0   2 : thumb_cmc1   3 : thumb_mcp    4 : thumb_ip     5 : thumb_tip
- 6 : index_mcp    7 : index_pip    8 : index_dip    9 : index_tip
-10 : middle_mcp  11 : middle_pip  12 : middle_dip  13 : middle_tip
-14 : ring_mcp    15 : ring_pip    16 : ring_dip    17 : ring_tip
-18 : pinky0      19 : pinky_mcp   20 : pinky_pip   21 : pinky_dip   22 : pinky_tip
-```
+![손가락 관절 위치](./HandModel_Naming.jpg)
+| Index | 관절 명칭 (Bone Name) | 설명 (Description) |
+| :---: | :--- | :--- |
+| **0** | `wrist` | 손목 중심점 (Root) |
+| **1** | `thumb_0` | 엄지 손바닥 쪽 뿌리 (CMC) |
+| **2** | `thumb_1` | 엄지 첫 마디 (MCP) |
+| **3** | `thumb_2` | 엄지 중간 마디 (IP) |
+| **4** | `thumb_3` | 엄지 끝 마디 (Distal) |
+| **5** | `thumb_tip` | **엄지 최종 끝점 (Tip)** |
+| **6** | `index_1` | 검지 뿌리 (MCP) |
+| **7** | `index_2` | 검지 중간 마디 (PIP) |
+| **8** | `index_3` | 검지 끝 마디 (DIP) |
+| **9** | `index_tip` | **검지 최종 끝점 (Tip)** |
+| **10** | `middle_1` | 중지 뿌리 (MCP) |
+| **11** | `middle_2` | 중지 중간 마디 (PIP) |
+| **12** | `middle_3` | 중지 끝 마디 (DIP) |
+| **13** | `middle_tip` | **중지 최종 끝점 (Tip)** |
+| **14** | `ring_1` | 약지 뿌리 (MCP) |
+| **15** | `ring_2` | 약지 중간 마디 (PIP) |
+| **16** | `ring_3` | 약지 끝 마디 (DIP) |
+| **17** | `ring_tip` | **약지 최종 끝점 (Tip)** |
+| **18** | `pinky_0` | 새끼손가락 손바닥 쪽 뿌리 (CMC) |
+| **19** | `pinky_1` | 새끼손가락 뿌리 (MCP) |
+| **20** | `pinky_2` | 새끼손가락 중간 마디 (PIP) |
+| **21** | `pinky_3` | 새끼손가락 끝 마디 (DIP) |
+| **22** | `pinky_tip` | **새끼손가락 최종 끝점 (Tip)** |
 
 ### 플레이스홀더
 
@@ -52,10 +70,11 @@ class FingerChain:
 | `_FINGERS` | `Dict[str, List[FingerChain]]` | `{'left':[], 'right':[]}` | 손가락 체인 (좌우 키로 분리) |
 | `_WRIST_LINK` | `Dict[str, str]` | `{'left':'world', 'right':'world'}` | TF parent frame 링크명 |
 | `_COORD_TRANSFORM` | `np.ndarray` (3×3) | `np.eye(3)` | Atlas → 로봇 좌표계 변환 |
-| `_SCALE_FACTOR` | `float` | `1.0` | Human 포지션 스케일 |
+| `_SCALE_FACTOR` | `float \| List[float]` | `1.0` | Human 포지션 스케일. `List`로 지정하면 손가락별(thumb→index→middle→ring→pinky 순) 개별 스케일 적용 |
 | `_URDF_FILENAME` | `str` | `'{hand_type}.urdf'` | URDF 파일명 포맷 |
 | `_SIDE_MAP` | `Dict[str, str]` | `{'left':'left', 'right':'right'}` | `{side}` 플레이스홀더 치환값 |
 | `_FIXED_JOINTS` | `Dict[str, str]` | `{}` | IK 후 0으로 고정할 조인트 |
+| `_WRIST_JOINTS` | `Dict[str, Dict[str, List[float]]]` | `{'left':{}, 'right':{}}` | 손목 직접 매핑: `{조인트명: 회전축[x,y,z]}`. 비어 있으면 비활성화 |
 
 ---
 
@@ -150,6 +169,47 @@ class MyHandConfig(HandConfig):
 
 ---
 
+## Case 4: 손목 직접 매핑 (`_WRIST_JOINTS`)
+
+IK 대신 AGA 센서 0번(wrist) 쿼터니언을 직접 swing-twist 분해해 손목 조인트를 구동하는 경우입니다.
+
+```python
+class MyHandConfig(HandConfig):
+    _MODEL_SUBDIR = 'my_hand'
+    _WRIST_LINK   = {'left': 'my_left_base', 'right': 'my_right_base'}
+
+    # 손목 조인트 직접 매핑: {조인트명: 로봇 프레임 회전축 [x,y,z]}
+    # 회전축은 단위 벡터. 결과 단위: rad.
+    _WRIST_JOINTS = {
+        'right': {
+            'wrist_flex_joint':  [0, 1, 0],   # Y축 굴곡/신전
+            'wrist_rot_joint':   [1, 0, 0],   # X축 내전/외전
+        },
+        'left': {},   # 왼손은 IK 사용
+    }
+```
+
+- 손목 조인트는 `robot_qpos[0]`에 직접 대입됩니다.
+- `_WRIST_JOINTS`가 비어 있는 손 방향(`{}`)은 IK 결과를 그대로 사용합니다.
+- 실시간 디버그 토픽 `/{side}_hand/wrist_xyz` 에서 확인 가능합니다:  
+  `data[0:4]` = 원시 쿼터니언(raw), `data[4:7]` = Euler XYZ(rad), `data[7+]` = swing-twist 각도(rad)
+
+---
+
+## 손가락별 스케일 (`_SCALE_FACTOR`)
+
+`float` 대신 `List[float]`를 지정하면 손가락별(thumb→index→middle→ring→pinky 순) 스케일을 개별 적용합니다.
+
+```python
+class MyHandConfig(HandConfig):
+    # 5개 값: [thumb, index, middle, ring, pinky]
+    _SCALE_FACTOR = [1.1, 1.2, 1.2, 1.3, 1.4]
+```
+
+리스트 길이가 손가락 수보다 짧으면 나머지 손가락은 1.0이 적용됩니다.
+
+---
+
 ## 등록 및 실행
 
 [`hand_configs.py`](../atlas_hand/core/hand_configs.py) 하단의 `CONFIG_REGISTRY`에 키를 추가합니다.
@@ -170,21 +230,3 @@ ros2 run atlas_hand retarget --ros-args -p hand_type:=left -p robot_config:=my_h
 ```
 
 ---
-
-## 검증 팁
-
-설정이 올바른지 빠르게 확인하려면 Python 인터프리터에서 직접 stage config를 출력해보세요.
-
-```python
-from atlas_hand.core.hand_configs import CONFIG_REGISTRY
-
-cfg = CONFIG_REGISTRY['my_hand']()
-s1, s2 = cfg.get_two_stage_config('left')
-
-print("stage1 origins :", s1['target_origin_link_names'])
-print("stage1 tasks   :", s1['target_task_link_names'])
-print("stage2 tips    :", s2['target_link_names'])
-print("wrist link     :", cfg.get_wrist_link_name('left'))
-```
-
-`origins`와 `tasks`의 길이가 같고, `stage2 tips`의 길이가 손가락 수와 같으면 정상입니다.
