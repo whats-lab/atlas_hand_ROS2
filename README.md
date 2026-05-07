@@ -216,7 +216,9 @@ ros2 launch atlas_hand hand_view.launch.py model:=robotis side:=left
 
 ## 새 로봇 핸드 추가
 
-1. `HandConfig`를 상속하는 클래스를 [atlas_hand/core/hand_configs.py](atlas_hand/core/hand_configs.py)에 구현
+상세 튜토리얼: [readme/adding_hand_config.md](readme/adding_hand_config.md)
+
+1. `HandConfig`를 상속하는 클래스를 [atlas_hand/core/hand_configs.py](atlas_hand/core/hand_configs.py)에 구현 (클래스 변수 선언만으로 완성)
 2. `CONFIG_REGISTRY`에 키 등록
 3. 실행 시 `--ros-args -p robot_config:=<key>`로 선택
 
