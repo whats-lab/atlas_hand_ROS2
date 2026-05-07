@@ -308,6 +308,7 @@ class OSCReceiverNode(Node):
     # ── OSC 수신 핸들러 ──────────────────────────────────────────────
 
     def _h_left_quat(self, address: str, *args) -> None:
+        print(args)
         raw = self._parse_floats(args, AGA_RAW_FLOAT_COUNT)
         if raw is None:
             self.get_logger().warn(

@@ -70,36 +70,36 @@ atlas_hand/
 ├── resource/
 │   └── atlas_hand                        # ament 패키지 마커
 ├── atlas_hand/                           # Python 소스
-│   ├── config.py                       # OSC 설정 및 AGA SDK 상수
+│   ├── config.py                         # OSC 설정 및 AGA SDK 상수
 │   ├── nodes/
-│   │   ├── osc_receiver.py             # AGA 글러브 OSC 수신 → ROS 2 토픽
-│   │   ├── retargeting.py              # Position 기반 리타겟팅 노드
-│   │   └── visualizer.py              # Rerun 3D 시각화 노드
+│   │   ├── osc_receiver.py               # AGA 글러브 OSC 수신 → ROS 2 토픽
+│   │   ├── retargeting.py                # 리타겟팅 노드
+│   │   └── visualizer.py                 # Rerun 3D 시각화 노드
 │   └── core/
-│       └── hand_spherical_fk.py        # Pinocchio FK + Rerun 시각화 클래스
-├── config/
-│   └── hand_data.json                  # 손 기구학 데이터 
+│       ├── hand_spherical_fk.py          # Pinocchio FK + Rerun 시각화 클래스
+│       └── hand_configs.py               # 핸드 모델별 리타겟팅 설정
+├── models/                               # 핸드 모델 (URDF + 메쉬)
+│   ├── base/                             # BodyParts3D 기반 기본 핸드
+│   │   ├── urdf/                         # left.urdf / right.urdf
+│   │   ├── meshes/                       # 시각화용 STL (left / right)
+│   │   └── assets/                       # 전체 해상도 메쉬 (visual / collision)
+│   ├── orca/                             # OrcaHand v2 (ETH Zurich)
+│   │   ├── urdf/                         # left.urdf / right.urdf
+│   │   ├── meshes/                       # STL (left / right)
+│   │   └── mjcf/                         # MuJoCo 메쉬
+│   └── robotis/                          # Robotis HX5 D20
+│       └── urdf/                         # hx5_d20_left.urdf / hx5_d20_right.urdf
 ├── launch/
-│   ├── atlas_hand.launch.py            # 메인 런처 (OSC + 리타겟팅)
-│   ├── left_hand_view.launch.py        # 왼손 URDF 뷰어 (RViz2)
-│   └── right_hand_view.launch.py       # 오른손 URDF 뷰어 (RViz2)
-├── urdf/
-│   ├── hands/
-│   │   ├── hx5_d20_left.urdf           # Robotis HX5 D20 왼손
-│   │   └── hx5_d20_right.urdf          # Robotis HX5 D20 오른손
-│   ├── left_hand/
-│   │   ├── urdf/left_hand_rerun.urdf
-│   │   └── meshes/stl/                 # 왼손 STL 메쉬
-│   └── right_hand/
-│       ├── urdf/right_hand_rerun.urdf
-│       └── meshes/stl/                 # 오른손 STL 메쉬
+│   ├── atlas_hand.launch.py              # 메인 런처 (OSC + 리타겟팅)
+│   └── hand_view.launch.py               # URDF 뷰어 (model × side 인자)
 ├── rviz/
-│   ├── left_hand_view.rviz
-│   └── right_hand_view.rviz
+│   ├── base_left.rviz
+│   ├── base_right.rviz
+│   ├── orca.rviz
+│   └── robotis.rviz
 └── docker/
     ├── Dockerfile
     └── docker.sh
-
 ```
 
 ---
@@ -195,9 +195,10 @@ ros2 run atlas_hand retarget --ros-args -p hand_type:=left -p robot_config:=robo
 ros2 run atlas_hand visualizer left spawn    # 로컬 뷰어(기본값)
 ros2 run atlas_hand visualizer left connect  # 외부 뷰어 연결
 
-# URDF 뷰어 (RViz2)
-ros2 launch atlas_hand left_hand_view.launch.py
-ros2 launch atlas_hand right_hand_view.launch.py
+# URDF 뷰어 (RViz2) — model: base | orca | robotis  /  side: left | right
+ros2 launch atlas_hand hand_view.launch.py
+ros2 launch atlas_hand hand_view.launch.py model:=orca    side:=right
+ros2 launch atlas_hand hand_view.launch.py model:=robotis side:=left
 ```
 ---
 
@@ -215,7 +216,9 @@ ros2 launch atlas_hand right_hand_view.launch.py
 
 ## 새 로봇 핸드 추가
 
-1. `HandConfig`를 상속하는 클래스를 [atlas_hand/core/hand_configs.py](atlas_hand/core/hand_configs.py)에 구현
+상세 튜토리얼: [readme/adding_hand_config.md](readme/adding_hand_config.md)
+
+1. `HandConfig`를 상속하는 클래스를 [atlas_hand/core/hand_configs.py](atlas_hand/core/hand_configs.py)에 구현 (클래스 변수 선언만으로 완성)
 2. `CONFIG_REGISTRY`에 키 등록
 3. 실행 시 `--ros-args -p robot_config:=<key>`로 선택
 
@@ -239,7 +242,7 @@ Copyright: © ROBOTIS Co., Ltd.
 
 License: Apache License 2.0
 
-Location: [urdf/hands/](urdf/hands/) 하위 모델 데이터
+Location: [models/robotis/](models/robotis/) 하위 모델 데이터
 
 Changes: 프로젝트의 ROS 2 환경에 맞춰 URDF 파일의 경로 수정 및 물리 파라미터 최적화가 수행되었습니다.
 
@@ -249,3 +252,12 @@ Copyright: © The Database Center for Life Science (DBCLS)
 License: Creative Commons Attribution 4.0 International (CC BY 4.0)
 
 Changes: 프로젝트의 목적(ROS 2 시뮬레이션 및 FK 연산)에 맞춰 원본 메쉬의 스케일 조정, 좌표축 변경 및 URDF 호환을 위한 리깅(Rigging) 작업이 수행되었습니다.
+
+
+#### 3. Orca Hand (Soft Tactile Gripper)
+Copyright: © Soft Robotics Lab (SRL), ETH Zurich
+
+License: MIT License
+
+Source: GitHub - [orcahand_description](https://github.com/orcahand/orcahand_description)
+
