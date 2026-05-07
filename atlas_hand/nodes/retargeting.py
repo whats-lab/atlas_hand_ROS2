@@ -16,10 +16,11 @@ retargeting.py
 """
 
 import sys
-from typing import Optional, List
+from typing import Optional, List, Union
 
 import numpy as np
 import rclpy
+from scipy.spatial.transform import Rotation as ScipyR
 
 from geometry_msgs.msg import TransformStamped
 from rclpy.node import Node
@@ -87,13 +88,20 @@ class RetargetingNode(Node):
 
         self._coord_transform    = config.get_coord_transform(self.hand_type)
         self._tf_coord_transform = config.get_tf_coord_transform(self.hand_type)
-        self._scale_factor       = config.get_scale_factor()
+        sf = config.get_scale_factor()
+        if isinstance(sf, list):
+            self._scale_array  = self._build_scale_array(config, sf)
+            self._scale_factor = 1.0
+        else:
+            self._scale_array  = None
+            self._scale_factor = float(sf)
         tf_param                 = self.get_parameter('tf_parent_frame').value
         self._tf_parent_frame    = tf_param if tf_param else config.get_wrist_link_name(self.hand_type)
 
         self.latest_quats: Optional[np.ndarray] = None
 
         self._init_seq_retarget(config)
+        self._init_wrist_retarget(config)
 
         self.fk = HandSphericalFK(self.hand_type)
         self.joint_state_pub = self.create_publisher(JointState, OUTPUT_TOPIC, 10)
@@ -164,6 +172,23 @@ class RetargetingNode(Node):
 
 
 
+    def _build_scale_array(self, config: HandConfig, sf_list: List[float]) -> np.ndarray:
+        fingers = config._get_fingers(self.hand_type)
+        arr = np.ones(23, dtype=np.float32)
+        for i, f in enumerate(fingers):
+            scale = float(sf_list[i]) if i < len(sf_list) else 1.0
+            for idx in f.human[1:]:  # wrist(0)은 centering 후 [0,0,0]이므로 제외
+                arr[idx] = scale
+        return arr
+
+    def _init_wrist_retarget(self, config):
+        wrist_cfg          = config._WRIST_JOINTS.get(self.hand_type, {})
+        self._wrist_joints = list(wrist_cfg.keys())
+        self._wrist_axes   = [np.array(v, dtype=np.float64) for v in wrist_cfg.values()]
+        if self._wrist_joints:
+            self.joint_names = self.joint_names + self._wrist_joints
+            self.get_logger().info(f"Wrist retargeting ON: {self._wrist_joints}")
+
     def _get_fixed_indices(self, config, robot):
         fixed_names = set(config.get_fixed_joint_names(self.hand_type))
         return [i for i, n in enumerate(robot.dof_joint_names) if n in fixed_names]
@@ -184,16 +209,23 @@ class RetargetingNode(Node):
             positions_robot    = (self._coord_transform    @ positions_centered.T).T
             positions_tf       = (self._tf_coord_transform @ positions_centered.T).T
 
-            if self._scale_factor != 1.0:
+            if self._scale_array is not None:
+                positions_robot *= self._scale_array[:, None]
+                positions_tf    *= self._scale_array[:, None]
+            elif self._scale_factor != 1.0:
                 positions_robot *= self._scale_factor
                 positions_tf    *= self._scale_factor
 
             self._broadcast_human_tf(positions_tf)
 
             robot_qpos = self._retarget_two_stage(positions_robot)
-  
+
             if self._fixed_indices:
                 robot_qpos[self._fixed_indices] = 0.0
+
+            if self._wrist_joints:
+                wrist_angles = self._retarget_wrist(self.latest_quats[0])
+                robot_qpos   = np.concatenate([robot_qpos, wrist_angles])
 
             self._publish(robot_qpos)
 
@@ -209,12 +241,42 @@ class RetargetingNode(Node):
             t.header.stamp    = now
             t.header.frame_id = self._tf_parent_frame
             t.child_frame_id  = f'human_{self.hand_type}_{_HUMAN_JOINT_NAMES[i]}'
+            # t.transform.translation.x = float(positions_robot[i, 0])
+            # t.transform.translation.y = -float(positions_robot[i, 2])
+            # t.transform.translation.z = float(positions_robot[i, 1])
             t.transform.translation.x = float(positions_robot[i, 0])
-            t.transform.translation.y = -float(positions_robot[i, 2])
-            t.transform.translation.z = float(positions_robot[i, 1])
+            t.transform.translation.y = float(positions_robot[i, 1])
+            t.transform.translation.z = float(positions_robot[i, 2])
             t.transform.rotation.w    = 1.0
             transforms.append(t)
         self._tf_broadcaster.sendTransform(transforms)
+
+    def _retarget_wrist(self, raw_xyzw: np.ndarray) -> np.ndarray:
+        """AGA 손목 쿼터니언 → 로봇 손목 조인트 각도 (직접 매핑, swing-twist).
+
+        raw_xyzw : AGA 센서 0번 쿼터니언 [x, y, z, w]
+        반환     : len(_wrist_joints) 크기의 각도 배열 (rad)
+        """
+        # 센서 좌표계 보정 (FK와 동일: y, z 반전)
+        q_corr = raw_xyzw * np.array([1.0, -1.0, -1.0, 1.0])
+        R_aga  = ScipyR.from_quat(q_corr)
+
+        # AGA → 로봇 프레임 변환
+        C       = ScipyR.from_matrix(self._coord_transform.astype(np.float64))
+        R_robot = C * R_aga * C.inv()
+
+        # 정규 형식: w >= 0 (q와 -q는 같은 회전)
+        q = R_robot.as_quat()   # [x, y, z, w]
+        if q[3] < 0:
+            q = -q
+        w, xyz = q[3], q[:3]
+
+        # 각 축별 swing-twist 분해 → 회전 각도
+        angles = np.zeros(len(self._wrist_axes))
+        for i, axis in enumerate(self._wrist_axes):
+            proj       = float(np.dot(xyz, axis))   # = sin(θ/2)
+            angles[i]  = 2.0 * np.arctan2(proj, w)  # θ ∈ (−π, π)
+        return angles
 
     def _retarget_two_stage(self, positions_robot: np.ndarray) -> np.ndarray:
         ref_vec     = positions_robot[self._s1_task_idx] - positions_robot[self._s1_origin_idx]
