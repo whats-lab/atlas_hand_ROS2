@@ -105,6 +105,11 @@ class RetargetingNode(Node):
 
         self.fk = HandSphericalFK(self.hand_type)
         self.joint_state_pub = self.create_publisher(JointState, OUTPUT_TOPIC, 10)
+        self._wrist_debug_pub = self.create_publisher(
+            Float32MultiArray,
+            f'/{self.hand_type}_hand/wrist_xyz',
+            10,
+        ) if self._wrist_joints else None
         self._tf_broadcaster = tf2_ros.TransformBroadcaster(self)
         self.quat_sub = self.create_subscription(
             Float32MultiArray,
@@ -185,9 +190,7 @@ class RetargetingNode(Node):
         wrist_cfg          = config._WRIST_JOINTS.get(self.hand_type, {})
         self._wrist_joints = list(wrist_cfg.keys())
         self._wrist_axes   = [np.array(v, dtype=np.float64) for v in wrist_cfg.values()]
-        if self._wrist_joints:
-            self.joint_names = self.joint_names + self._wrist_joints
-            self.get_logger().info(f"Wrist retargeting ON: {self._wrist_joints}")
+       
 
     def _get_fixed_indices(self, config, robot):
         fixed_names = set(config.get_fixed_joint_names(self.hand_type))
@@ -216,7 +219,7 @@ class RetargetingNode(Node):
                 positions_robot *= self._scale_factor
                 positions_tf    *= self._scale_factor
 
-            self._broadcast_human_tf(positions_tf)
+            # self._broadcast_human_tf(positions_tf)
 
             robot_qpos = self._retarget_two_stage(positions_robot)
 
@@ -225,7 +228,8 @@ class RetargetingNode(Node):
 
             if self._wrist_joints:
                 wrist_angles = self._retarget_wrist(self.latest_quats[0])
-                robot_qpos   = np.concatenate([robot_qpos, wrist_angles])
+                robot_qpos[0] = wrist_angles
+                # robot_qpos[0]   =  np.clip(wrist_angles, -1.1344640137963142, 0.6108652381980153)
 
             self._publish(robot_qpos)
 
@@ -269,14 +273,11 @@ class RetargetingNode(Node):
         q = R_robot.as_quat()   # [x, y, z, w]
         if q[3] < 0:
             q = -q
-        w, xyz = q[3], q[:3]
-
-        # 각 축별 swing-twist 분해 → 회전 각도
-        angles = np.zeros(len(self._wrist_axes))
-        for i, axis in enumerate(self._wrist_axes):
-            proj       = float(np.dot(xyz, axis))   # = sin(θ/2)
-            angles[i]  = 2.0 * np.arctan2(proj, w)  # θ ∈ (−π, π)
-        return angles
+            
+        r_180 = ScipyR.from_euler('x', 90, degrees=True)
+        R_combined = r_180 * R_robot
+        euler = R_combined.as_euler('xyz', degrees=False)  # x, y, z 순서로 변환
+        return -euler[0]
 
     def _retarget_two_stage(self, positions_robot: np.ndarray) -> np.ndarray:
         ref_vec     = positions_robot[self._s1_task_idx] - positions_robot[self._s1_origin_idx]
