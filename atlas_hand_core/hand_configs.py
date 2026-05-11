@@ -128,7 +128,7 @@ class HandConfig(ABC):
             'urdf_path': urdf_path,
             'target_link_names':         [f.links[-1] for f in fingers],
             'target_link_human_indices': [f.human[-1] for f in fingers],
-            'low_pass_alpha': 0.8,
+            'low_pass_alpha': -1.0,
         }
         return stage1, stage2
 
