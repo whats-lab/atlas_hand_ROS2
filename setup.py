@@ -36,9 +36,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'osc_receiver = atlas_hand.osc_receiver_node:main',
-            'retarget     = atlas_hand.retargeting_node:main',
-            'visualizer   = atlas_hand.visualizer_node:main',
+            'input_receiver = atlas_hand.input_receiver_node:main',
+            'retarget       = atlas_hand.retargeting_node:main',
+            'visualizer     = atlas_hand.visualizer_node:main',
         ],
     },
 )
