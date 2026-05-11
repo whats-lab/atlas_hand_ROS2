@@ -402,6 +402,23 @@ class TesolloDG5FConfig(HandConfig):
 
 
 # ==============================================================================
+# ABILITY HAND CONFIG
+# ==============================================================================
+
+class AbilityHandConfig(HandConfig):
+    """PSYONIC Ability Hand — 5-finger.
+
+    좌/우 링크명 동일. 손목 링크: base.
+    _FINGERS는 Thumb / Index / Middle / Ring / Pinky 순서로 직접 구현.
+    """
+    _MODEL_SUBDIR  = 'ability_hand'
+    _URDF_SUBDIR   = ''
+    _URDF_FILENAME = 'ability_hand_{hand_type}.urdf'
+    _WRIST_LINK    = {'left': 'base', 'right': 'base'}
+    _FINGERS: ClassVar[Dict[str, List[FingerChain]]] = {'left': [], 'right': []}
+
+
+# ==============================================================================
 # CONFIG REGISTRY
 # ==============================================================================
 
@@ -413,4 +430,5 @@ CONFIG_REGISTRY: Dict[str, Type[HandConfig]] = {
     "leap_hand":       LeapHandConfig,
     "schunk_svh":      SchunkSVHConfig,
     "tesollo_dg5f":    TesolloDG5FConfig,
+    "ability_hand":    AbilityHandConfig,
 }

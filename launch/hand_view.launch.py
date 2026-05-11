@@ -36,14 +36,18 @@ def _launch_setup(context):
     ]
 
     rviz_file = config._RVIZ_FILENAME.get(side, '')
+    rviz_args = []
     if rviz_file:
         rviz_path = os.path.join(pkg_share, 'models', config._MODEL_SUBDIR, 'rviz', rviz_file)
-        nodes.append(Node(
-            package='rviz2',
-            executable='rviz2',
-            output='screen',
-            arguments=['-d', rviz_path],
-        ))
+        if os.path.exists(rviz_path):
+            rviz_args = ['-d', rviz_path]
+
+    nodes.append(Node(
+        package='rviz2',
+        executable='rviz2',
+        output='screen',
+        arguments=rviz_args,
+    ))
 
     return nodes
 
