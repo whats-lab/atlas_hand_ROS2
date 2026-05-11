@@ -33,7 +33,7 @@ def _launch_setup(context, *args, **kwargs):
     
 
     rviz_config = _RVIZ.get(model, {}).get(side, 'config.rviz')
-    rviz_path = os.path.join(pkg_share, 'rviz', rviz_config)
+    rviz_path = os.path.join(pkg_share, 'models', model, 'rviz', rviz_config)
 
     return [
         Node(

@@ -13,7 +13,7 @@ def _collect_data_files(src_dirs):
                 result.append((os.path.join('share', package_name, root), file_list))
     return result
 
-urdf_files = _collect_data_files(['models', 'rviz'])
+urdf_files = _collect_data_files(['models'])
 
 setup(
     name=package_name,
@@ -36,12 +36,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            # OSC 수신 노드
-            'osc_receiver = atlas_hand.nodes.osc_receiver:main',
-            # Position 기반 리타겟팅 노드
-            'retarget     = atlas_hand.nodes.retargeting:main',
-            # 3D 시각화 노드 
-            'visualizer   = atlas_hand.nodes.visualizer:main',
+            'osc_receiver = atlas_hand.osc_receiver_node:main',
+            'retarget     = atlas_hand.retargeting_node:main',
+            'visualizer   = atlas_hand.visualizer_node:main',
         ],
     },
 )
