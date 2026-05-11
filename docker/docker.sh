@@ -14,7 +14,7 @@ FASTDDS_TRANSPORT="${FASTDDS_BUILTIN_TRANSPORTS:-UDPv4}"
 case "$1" in
 
   build)
-    echo ">>> 이미지 빌드 (모든 의존성 포함)"
+    echo ">>> 이미지 빌드"
     docker build -f "${SCRIPT_DIR}/Dockerfile" \
       -t "$IMAGE" "$REPO_ROOT"
     ;;
