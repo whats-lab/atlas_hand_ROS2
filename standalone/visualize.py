@@ -48,7 +48,7 @@ def _parse_args():
 def main():
     hand_type, mode, source_type = _parse_args()
 
-    urdf_path = os.path.join(_MODELS_DIR, 'base', 'urdf', f'{hand_type}.urdf')
+    urdf_path = os.path.join(_MODELS_DIR, 'base_hand', 'urdf', f'{hand_type}.urdf')
     if not os.path.exists(urdf_path):
         print(f"[ERROR] URDF 없음: {urdf_path}")
         sys.exit(1)

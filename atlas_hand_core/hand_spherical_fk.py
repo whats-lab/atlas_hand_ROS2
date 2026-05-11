@@ -172,7 +172,7 @@ class HandSphericalFK:
                 share_dir = get_package_share_directory('atlas_hand')
             except Exception:
                 share_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
-            urdf_path = os.path.join(share_dir, 'models', 'base', 'urdf', f'{self.hand_type}.urdf')
+            urdf_path = os.path.join(share_dir, 'models', 'base_hand', 'urdf', f'{self.hand_type}.urdf')
         
         self.model = build_model(urdf_path, self.hand_type)
         self.data  = self.model.createData()

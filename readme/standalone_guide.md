@@ -22,9 +22,15 @@ pip install -r requirements.txt
 ## 설치
 
 ```bash
-git clone https://github.com/whats-lab/atlas_hand_ROS2 
+git clone --recurse-submodules https://github.com/whats-lab/atlas_hand_ROS2
 cd atlas_hand_ROS2
 pip install -r requirements.txt
+```
+
+이미 클론한 경우:
+
+```bash
+git submodule update --init
 ```
 
 ---
@@ -57,10 +63,10 @@ python standalone/retarget.py right
 
 # 로봇 핸드 설정 지정
 python standalone/retarget.py left orca_hand
-python standalone/retarget.py right robotis_hx5
+python standalone/retarget.py right robotis_hx5_d20
 
 # Meta Quest
-python standalone/retarget.py left base meta_quest
+python standalone/retarget.py left base_hand meta_quest
 python standalone/retarget.py right orca_hand meta_quest
 ```
 

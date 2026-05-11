@@ -41,7 +41,7 @@ class HandVisualizerNode(Node):
             self.get_logger().error(f"Failed to find atlas_hand package share: {e}")
             pkg_share = "."
             
-        urdf_path = os.path.join(pkg_share, 'models', 'base', 'urdf', f'{self.hand_type}.urdf')
+        urdf_path = os.path.join(pkg_share, 'models', 'base_hand', 'urdf', f'{self.hand_type}.urdf')
 
         if not os.path.exists(urdf_path):
             self.get_logger().warn(f"URDF path not found: {urdf_path}")

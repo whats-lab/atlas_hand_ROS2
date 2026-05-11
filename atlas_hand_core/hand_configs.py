@@ -4,7 +4,8 @@ hand_configs.py
 
 새로운 로봇 핸드를 추가하려면:
   1. HandConfig를 상속하는 클래스를 구현 — 클래스 변수 선언만으로 완성
-     - _MODEL_SUBDIR    : models/{subdir}/urdf 경로
+     - _MODEL_SUBDIR    : models/{subdir} 경로
+     - _URDF_SUBDIR     : URDF 서브디렉토리 (기본: 'urdf', dex-urdf 계열은 '')
      - _FINGERS         : {'left': [...], 'right': [...]}  FingerChain 리스트
      - _WRIST_LINK      : {'left': '<link>', 'right': '<link>'}
      - _COORD_TRANSFORM : 3×3 변환 행렬 (기본: 단위행렬)
@@ -26,11 +27,11 @@ Human 손 인덱스 레이아웃 (23 포인트, 0~22)
 """
 
 import os
-import numpy as np
+from typing import ClassVar, Dict, List, Type, Union
 
+import numpy as np
 from abc import ABC
 from dataclasses import dataclass
-from typing import ClassVar, Dict, List, Type, Union
 
 
 def _get_package_share() -> str:
@@ -68,12 +69,13 @@ class HandConfig(ABC):
 
     필수
     ----
-    _MODEL_SUBDIR  : models/{subdir}/urdf 경로
+    _MODEL_SUBDIR  : models/{subdir} 경로
     _FINGERS       : {'left': [...], 'right': [...]}
     _WRIST_LINK    : {'left': '<link>', 'right': '<link>'}
 
     선택 (기본값 있음)
     ------------------
+    _URDF_SUBDIR     : URDF 서브디렉토리  (기본: 'urdf', dex-urdf 계열은 '')
     _COORD_TRANSFORM : 3×3 변환 행렬     (기본: 단위행렬)
     _SCALE_FACTOR    : 스케일 팩터       (기본: 1.0)
     _URDF_FILENAME   : 파일명 포맷 문자열 (기본: '{hand_type}.urdf')
@@ -92,10 +94,15 @@ class HandConfig(ABC):
     _FIXED_JOINTS:    ClassVar[Dict[str, str]]                         = {}
     # 손목 직접 매핑: {'left': {조인트명: 회전축}, 'right': {...}} — 빈 내부 dict = off
     _WRIST_JOINTS:    ClassVar[Dict[str, Dict[str, List[float]]]]      = {'left': {}, 'right': {}}
+    # URDF 서브디렉토리: 기존 핸드는 'urdf', dex-urdf 계열(URDF가 루트에 있음)은 ''
+    _URDF_SUBDIR:     ClassVar[str]                                    = 'urdf'
+    # RViz 설정 파일명: hand_view.launch.py에서 사용. 없으면 RViz 노드 미실행
+    _RVIZ_FILENAME:   ClassVar[Dict[str, str]]                         = {}
 
     def __init__(self):
         share_dir = _get_package_share()
-        self._urdf_dir = os.path.join(share_dir, "models", self._MODEL_SUBDIR, "urdf")
+        base = os.path.join(share_dir, "models", self._MODEL_SUBDIR)
+        self._urdf_dir = os.path.join(base, self._URDF_SUBDIR) if self._URDF_SUBDIR else base
 
     def _get_urdf_path(self, hand_type: str) -> str:
         return os.path.join(self._urdf_dir, self._URDF_FILENAME.format(hand_type=hand_type))
@@ -154,9 +161,10 @@ class HandConfig(ABC):
 # ==============================================================================
 
 class BaseHandConfig(HandConfig):
-    """models/base/urdf/{hand_type}.urdf 기반 설정."""
+    """models/base_hand/urdf/{hand_type}.urdf 기반 설정."""
 
-    _MODEL_SUBDIR = 'base'
+    _MODEL_SUBDIR   = 'base_hand'
+    _RVIZ_FILENAME  = {'left': 'base_left.rviz', 'right': 'base_right.rviz'}
     _WRIST_LINK   = {'left': 'left_wrist', 'right': 'right_wrist'}
 
     _chains = [
@@ -197,11 +205,13 @@ class RobotisHX5Config(HandConfig):
     """Robotis HX5 핸드 설정.
 
     - {side} : 'l' / 'r' 약어
+    - _RVIZ_FILENAME: 좌/우 동일 파일
     - {wrist} : wrist base 링크명
     """
 
-    _MODEL_SUBDIR  = 'robotis'
+    _MODEL_SUBDIR  = 'robotis_hx5_d20'
     _URDF_FILENAME = 'hx5_d20_{hand_type}.urdf'
+    _RVIZ_FILENAME = {'left': 'robotis.rviz', 'right': 'robotis.rviz'}
     _SIDE_MAP      = {'left': 'l',                 'right': 'r'}
     _WRIST_LINK    = {'left': 'hx5_d20_left_base', 'right': 'hx5_d20_right_base'}
     _COORD_TRANSFORM: ClassVar[np.ndarray] = np.array(
@@ -250,7 +260,8 @@ class OrcaHandConfig(HandConfig):
     Left hand는 TIP_OFFSET 링크 미지원 (WIP).
     """
 
-    _MODEL_SUBDIR = 'orca'
+    _MODEL_SUBDIR  = 'orca_hand'
+    _RVIZ_FILENAME = {'left': 'orca.rviz', 'right': 'orca.rviz'}
     _WRIST_LINK   = {'right': 'R-Carpals_8d1f1041', 'left': 'L-Carpals_719fff8c'}
     _COORD_TRANSFORM: ClassVar[np.ndarray] = np.array(
         [[0, 0, -1], [1, 0, 0], [0, -1, 0]], dtype=np.float32
@@ -324,11 +335,82 @@ class OrcaHandConfig(HandConfig):
 
 
 # ==============================================================================
+# ALLEGRO HAND CONFIG
+# ==============================================================================
+
+class AllegroHandConfig(HandConfig):
+    """Allegro Hand (Wonik Robotics) — 4-finger, 16-DOF.
+
+    좌/우 링크명 동일. _FINGERS는 Thumb / Index / Middle / Ring 순서로 직접 구현.
+    """
+    _MODEL_SUBDIR  = 'allegro_hand'
+    _URDF_SUBDIR   = ''
+    _URDF_FILENAME = 'allegro_hand_{hand_type}.urdf'
+    _WRIST_LINK    = {'left': 'palm', 'right': 'palm'}
+    _FINGERS: ClassVar[Dict[str, List[FingerChain]]] = {'left': [], 'right': []}
+
+
+# ==============================================================================
+# LEAP HAND CONFIG
+# ==============================================================================
+
+class LeapHandConfig(HandConfig):
+    """LEAP Hand (CMU) — 4-finger, 16-DOF.
+
+    좌/우 링크명 동일. _FINGERS는 Index / Middle / Ring / Thumb 순서로 직접 구현.
+    """
+    _MODEL_SUBDIR  = 'leap_hand'
+    _URDF_SUBDIR   = ''
+    _URDF_FILENAME = 'leap_hand_{hand_type}.urdf'
+    _WRIST_LINK    = {'left': 'palm_lower', 'right': 'palm_lower'}
+    _FINGERS: ClassVar[Dict[str, List[FingerChain]]] = {'left': [], 'right': []}
+
+
+# ==============================================================================
+# SCHUNK SVH CONFIG
+# ==============================================================================
+
+class SchunkSVHConfig(HandConfig):
+    """SCHUNK SVH — 5-finger, 9-DOF.
+
+    side 접두어: 'left_hand' / 'right_hand'. {side} = 'left' / 'right'.
+    _FINGERS는 Thumb / Index / Middle / Ring / Pinky 순서로 직접 구현.
+    """
+    _MODEL_SUBDIR  = 'schunk_hand'
+    _URDF_SUBDIR   = ''
+    _URDF_FILENAME = 'schunk_svh_hand_{hand_type}.urdf'
+    _WRIST_LINK    = {'left': 'left_hand_e1', 'right': 'right_hand_e1'}
+    _FINGERS: ClassVar[Dict[str, List[FingerChain]]] = {'left': [], 'right': []}
+
+
+# ==============================================================================
+# TESOLLO DG5F CONFIG
+# ==============================================================================
+
+class TesolloDG5FConfig(HandConfig):
+    """Tesollo DG5F — 5-finger, 20-DOF.
+
+    링크명 접두어: ll_ (left) / rl_ (right).
+    _FINGERS는 Finger1~5 순서로 직접 구현.
+    """
+    _MODEL_SUBDIR  = 'tesollo_dg5f'
+    _URDF_SUBDIR   = ''
+    _URDF_FILENAME = 'dg5f_{hand_type}.urdf'
+    _SIDE_MAP      = {'left': 'll', 'right': 'rl'}
+    _WRIST_LINK    = {'left': 'll_dg_palm', 'right': 'rl_dg_palm'}
+    _FINGERS: ClassVar[Dict[str, List[FingerChain]]] = {'left': [], 'right': []}
+
+
+# ==============================================================================
 # CONFIG REGISTRY
 # ==============================================================================
 
 CONFIG_REGISTRY: Dict[str, Type[HandConfig]] = {
-    "robotis_hx5": RobotisHX5Config,
-    "base":        BaseHandConfig,
-    "orca_hand":   OrcaHandConfig,
+    "base_hand":       BaseHandConfig,
+    "orca_hand":       OrcaHandConfig,
+    "robotis_hx5_d20": RobotisHX5Config,
+    "allegro_hand":    AllegroHandConfig,
+    "leap_hand":       LeapHandConfig,
+    "schunk_svh":      SchunkSVHConfig,
+    "tesollo_dg5f":    TesolloDG5FConfig,
 }
