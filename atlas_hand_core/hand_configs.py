@@ -31,7 +31,14 @@ import numpy as np
 from abc import ABC
 from dataclasses import dataclass
 from typing import ClassVar, Dict, List, Type, Union
-from ament_index_python.packages import get_package_share_directory
+
+
+def _get_package_share() -> str:
+    try:
+        from ament_index_python.packages import get_package_share_directory
+        return get_package_share_directory("atlas_hand")
+    except Exception:
+        return os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
 
 
 # ==============================================================================
@@ -87,7 +94,7 @@ class HandConfig(ABC):
     _WRIST_JOINTS:    ClassVar[Dict[str, Dict[str, List[float]]]]      = {'left': {}, 'right': {}}
 
     def __init__(self):
-        share_dir = get_package_share_directory("atlas_hand")
+        share_dir = _get_package_share()
         self._urdf_dir = os.path.join(share_dir, "models", self._MODEL_SUBDIR, "urdf")
 
     def _get_urdf_path(self, hand_type: str) -> str:

@@ -167,11 +167,12 @@ class HandSphericalFK:
         self.pfx = self.hand_type + '_'
 
         if urdf_path is None:
-            from ament_index_python.packages import get_package_share_directory
-            urdf_path = os.path.join(
-                get_package_share_directory('atlas_hand'),
-                'models', 'base', 'urdf', f'{self.hand_type}.urdf',
-            )
+            try:
+                from ament_index_python.packages import get_package_share_directory
+                share_dir = get_package_share_directory('atlas_hand')
+            except Exception:
+                share_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
+            urdf_path = os.path.join(share_dir, 'models', 'base', 'urdf', f'{self.hand_type}.urdf')
         
         self.model = build_model(urdf_path, self.hand_type)
         self.data  = self.model.createData()
