@@ -3,13 +3,17 @@ atlas_hand_core/config.py
 하드웨어 / 알고리즘 설정 상수 (ROS2 비의존)
 """
 
-# ── OSC 네트워크 ──────────────────────────────────────────────────────
+# ── OSC 네트워크 (Atlas 글러브) ───────────────────────────────────────
 OSC_LISTEN_IP            = "0.0.0.0"
 OSC_SERVER_PORT          = 4040
 OSC_CLIENT_PORT          = 4042
 OSC_TARGET_IP            = "127.0.0.1"
 HEARTBEAT_INTERVAL_SEC   = 1.0
 HAPTIC_PING_INTERVAL_SEC = 2.0
+
+# ── UDP 네트워크 (Meta Quest) ─────────────────────────────────────────
+QUEST_UDP_PORT  = 9090
+QUEST_DISC_PORT = 9001
 
 # ── AGA 센서 데이터 포맷 ──────────────────────────────────────────────
 AGA_JOINT_COUNT     = 18

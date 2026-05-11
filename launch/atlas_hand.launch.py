@@ -25,21 +25,24 @@ def generate_launch_description():
     
     robot_type = LaunchConfiguration('robot_config')
     
+    input_source_arg = DeclareLaunchArgument(
+        'input_source',
+        default_value='atlas',
+        description="입력 소스: 'atlas' | 'meta_quest'",
+    )
+
     return LaunchDescription([
         hand_type_arg,
         robot_config_arg,
+        input_source_arg,
 
         Node(
             package='atlas_hand',
-            executable='osc_receiver',
-            name='osc_receiver',
+            executable='input_receiver',
+            name='input_receiver',
             output='screen',
             parameters=[{
-                'listen_ip':   '0.0.0.0',
-                'server_port': 4040,
-                'client_port': 4042,
-                'target_ip':   '127.0.0.1',
-                'verbose':     False,
+                'input_source': LaunchConfiguration('input_source'),
             }],
         ),
 
