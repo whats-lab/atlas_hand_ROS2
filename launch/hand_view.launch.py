@@ -35,12 +35,20 @@ def _launch_setup(context):
         ),
     ]
 
-    rviz_file = config._RVIZ_FILENAME.get(side, '')
+    rviz_dir  = os.path.join(pkg_share, 'models', config._MODEL_SUBDIR, 'rviz')
     rviz_args = []
-    if rviz_file:
-        rviz_path = os.path.join(pkg_share, 'models', config._MODEL_SUBDIR, 'rviz', rviz_file)
-        if os.path.exists(rviz_path):
-            rviz_args = ['-d', rviz_path]
+    # _RVIZ_FILENAME 명시 → 해당 파일 사용
+    # 미설정 → {model}_{side}.rviz → {model}.rviz 순으로 자동 탐색
+    explicit = config._RVIZ_FILENAME.get(side, '')
+    candidates = (
+        [explicit] if explicit
+        else [f'{config._MODEL_SUBDIR}_{side}.rviz', f'{config._MODEL_SUBDIR}.rviz']
+    )
+    for name in candidates:
+        path = os.path.join(rviz_dir, name)
+        if os.path.exists(path):
+            rviz_args = ['-d', path]
+            break
 
     nodes.append(Node(
         package='rviz2',

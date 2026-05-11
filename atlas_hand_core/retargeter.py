@@ -72,9 +72,10 @@ class HandRetargeter:
         s2_dict.update({'normal_delta': NORM_DELTA, 'huber_delta': HUBER_DELTA})
 
         cfg1 = RetargetingConfig.from_dict(s1_dict)
-        cfg2 = RetargetingConfig.from_dict(s2_dict)
         self._seq_stage1 = cfg1.build()
         self._seq_stage1.optimizer.opt.set_maxtime(stage1_time)
+        
+        cfg2 = RetargetingConfig.from_dict(s2_dict)
         self._seq_stage2 = cfg2.build()
         self._seq_stage2.optimizer.opt.set_maxtime(stage2_time)
 
@@ -98,6 +99,8 @@ class HandRetargeter:
 
         Returns:
             np.ndarray: len(joint_names) 크기의 조인트 각도 배열
+        Side-effect:
+            self.last_human_positions 에 변환 후 human 포지션 저장 (TF 발행용)
         """
         positions          = self.fk.compute_positions(sensor_quats_17)
         positions_centered = positions - positions[0]
@@ -107,6 +110,8 @@ class HandRetargeter:
             positions_robot *= self._scale_array[:, None]
         elif self._scale_factor != 1.0:
             positions_robot *= self._scale_factor
+
+        self.last_human_positions = positions_robot  # TF 발행용
 
         robot_qpos = self._two_stage_retarget(positions_robot)
 
@@ -123,6 +128,7 @@ class HandRetargeter:
     def _two_stage_retarget(self, positions_robot: np.ndarray) -> np.ndarray:
         ref_vec     = positions_robot[self._s1_task_idx] - positions_robot[self._s1_origin_idx]
         stage1_qpos = self._seq_stage1.retarget(ref_vec)
+        # return stage1_qpos
         self._seq_stage2.set_qpos(stage1_qpos)
         return self._seq_stage2.retarget(positions_robot[self._s2_tip_idx])
 
