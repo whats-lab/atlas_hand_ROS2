@@ -93,10 +93,14 @@ atlas_hand_ROS2/
 ├── scripts/                              # 개발/테스트 유틸리티
 │   └── test_haptic_left.py               # 왼손 햅틱 수동 테스트 (1/2 키)
 │
-├── models/                               # 핸드 모델 (URDF + 메쉬 + RViz 설정)
-│   ├── base/    — urdf/ meshes/ assets/ rviz/
-│   ├── orca/    — urdf/ meshes/ rviz/
-│   └── robotis/ — urdf/ meshes/ rviz/
+├── models/                               # 핸드 모델 서브모듈 → dexterous-hand-urdf
+│   ├── base_hand/       — urdf/ meshes/ assets/ rviz/
+│   ├── orca_hand/       — urdf/ meshes/ rviz/
+│   ├── robotis_hx5_d20/ — urdf/ meshes/ rviz/
+│   ├── allegro_hand/    — meshes/ (URDF 루트)
+│   ├── leap_hand/       — meshes/ (URDF 루트)
+│   ├── schunk_hand/     — meshes/ (URDF 루트)
+│   └── tesollo_dg5f/    — meshes/ (URDF 루트)
 │
 ├── launch/
 │   ├── atlas_hand.launch.py              # 메인 런처

@@ -40,7 +40,7 @@ class HandRetargeter:
     def __init__(
         self,
         hand_type: str,
-        config_name: str = 'base',
+        config_name: str = 'base_hand',
         vector_weight: float = VECTOR_WEIGHT,
         position_weight: float = POSITION_WEIGHT,
     ):
