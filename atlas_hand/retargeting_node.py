@@ -4,11 +4,13 @@ retargeting.py
 Hand Retargeting ROS 2 노드
 
 파이프라인 (HandRetargeter 코어 사용):
-  /quaternions → HandRetargeter.compute() → /joint_states
+  /quaternions → HandRetargeter.compute() → /joint_states + TF
 """
 
 import numpy as np
 import rclpy
+import tf2_ros
+from geometry_msgs.msg import TransformStamped
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float32MultiArray
@@ -16,25 +18,44 @@ from std_msgs.msg import Float32MultiArray
 from atlas_hand_core.config import CONTROL_TIMER_SEC, POSITION_WEIGHT, VECTOR_WEIGHT
 from atlas_hand_core.retargeter import HandRetargeter
 
+_HUMAN_JOINT_NAMES = [
+    'wrist',
+    'thumb_cmc0', 'thumb_cmc1', 'thumb_mcp', 'thumb_ip',   'thumb_tip',
+    'index_mcp',  'index_pip',  'index_dip',  'index_tip',
+    'middle_mcp', 'middle_pip', 'middle_dip', 'middle_tip',
+    'ring_mcp',   'ring_pip',   'ring_dip',   'ring_tip',
+    'pinky0',     'pinky_mcp',  'pinky_pip',  'pinky_dip',  'pinky_tip',
+]
+
 
 class RetargetingNode(Node):
 
     def __init__(self):
         super().__init__('retargeting_node')
         self.declare_parameter('hand_type',       'left')
-        self.declare_parameter('robot_config',    'hand_rerun')
+        self.declare_parameter('robot_config',    'base_hand')
         self.declare_parameter('vector_weight',   VECTOR_WEIGHT)
         self.declare_parameter('position_weight', POSITION_WEIGHT)
+        self.declare_parameter('tf_parent_frame', '')
 
         hand_type   = self.get_parameter('hand_type').value.lower()
         config_name = self.get_parameter('robot_config').value
         vw          = self.get_parameter('vector_weight').value
         pw          = self.get_parameter('position_weight').value
+        tf_param    = self.get_parameter('tf_parent_frame').value
 
         self.retargeter   = HandRetargeter(hand_type, config_name, vw, pw)
+        self.hand_type    = hand_type
         self.latest_quats = None
 
-        self._pub = self.create_publisher(JointState, '/joint_states', 10)
+        from atlas_hand_core.hand_configs import CONFIG_REGISTRY
+        self._tf_parent_frame = (
+            tf_param if tf_param
+            else CONFIG_REGISTRY[config_name]().get_wrist_link_name(hand_type)
+        )
+
+        self._pub            = self.create_publisher(JointState, '/joint_states', 10)
+        self._tf_broadcaster = tf2_ros.TransformBroadcaster(self)
         self._sub = self.create_subscription(
             Float32MultiArray,
             f'/{hand_type}_hand/quaternions',
@@ -52,16 +73,33 @@ class RetargetingNode(Node):
         if self.latest_quats is None:
             return
         try:
-            self._publish(self.retargeter.compute(self.latest_quats))
+            robot_qpos = self.retargeter.compute(self.latest_quats)
+            self._publish(robot_qpos)
+            self._broadcast_human_tf(self.retargeter.last_human_positions)
         except Exception as e:
             self.get_logger().error(f"Processing error: {e}", throttle_duration_sec=1.0)
 
     def _publish(self, robot_qpos: np.ndarray):
-        msg          = JointState()
+        msg              = JointState()
         msg.header.stamp = self.get_clock().now().to_msg()
-        msg.name     = self.retargeter.joint_names
-        msg.position = robot_qpos.tolist()
+        msg.name         = self.retargeter.joint_names
+        msg.position     = robot_qpos.tolist()
         self._pub.publish(msg)
+
+    def _broadcast_human_tf(self, positions: np.ndarray):
+        now        = self.get_clock().now().to_msg()
+        transforms = []
+        for i, pos in enumerate(positions[:len(_HUMAN_JOINT_NAMES)]):
+            t                       = TransformStamped()
+            t.header.stamp          = now
+            t.header.frame_id       = self._tf_parent_frame
+            t.child_frame_id        = f'human_{self.hand_type}_{_HUMAN_JOINT_NAMES[i]}'
+            t.transform.translation.x = float(pos[0])
+            t.transform.translation.y = float(pos[1])
+            t.transform.translation.z = float(pos[2])
+            t.transform.rotation.w    = 1.0
+            transforms.append(t)
+        self._tf_broadcaster.sendTransform(transforms)
 
 
 def main(args=None):
