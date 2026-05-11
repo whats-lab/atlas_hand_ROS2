@@ -24,7 +24,7 @@ import rerun as rr
 import rerun.blueprint as rrb
 from ament_index_python.packages import get_package_share_directory
 
-from atlas_hand.core.hand_spherical_fk import HandRerunViz
+from atlas_hand_core.hand_spherical_fk import HandRerunViz
 
 class HandVisualizerNode(Node):
     def __init__(self, hand_type: str = 'left', mode: str = 'spawn'):
