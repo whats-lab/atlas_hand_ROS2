@@ -37,9 +37,9 @@ RUN pip3 install --break-system-packages --default-timeout=1000 \
 COPY . ${COLCON_WS}/src/atlas_hand/
 
 RUN bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
-    colcon build --symlink-install --packages-select atlas_hand"
+    colcon build --packages-select atlas_hand"
 
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc && \
     echo "source ${COLCON_WS}/install/setup.bash" >> ~/.bashrc && \
-    echo "alias cb='colcon build --symlink-install --packages-select atlas_hand'" >> ~/.bashrc 
+    echo "alias cb='colcon build --packages-select atlas_hand'" >> ~/.bashrc 
 CMD ["bash"]
