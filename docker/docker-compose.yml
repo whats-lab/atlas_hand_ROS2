@@ -1,0 +1,17 @@
+services:
+  atlas_hand:
+    image: atlas_hand:latest
+    container_name: atlas_hand
+    network_mode: host
+    ipc: host
+    privileged: true
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - FASTDDS_BUILTIN_TRANSPORTS=${FASTDDS_BUILTIN_TRANSPORTS:-UDPv4}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /:/host
+      - ..:/root/ros2_ws/src/atlas_hand
+    stdin_open: true
+    tty: true
+    command: bash
