@@ -1,48 +1,85 @@
 #!/bin/bash
-# 사용법:
-#   ./docker/docker.sh build         이미지 빌드 
-#   ./docker/docker.sh enter         인터랙티브 셸
 
-set -e
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+CONTAINER_NAME="atlas_hand"
 
-IMAGE="atlas_hand:latest"
-COLCON_WS="/root/ros2_ws"
-FASTDDS_TRANSPORT="${FASTDDS_BUILTIN_TRANSPORTS:-UDPv4}"
+show_help() {
+    echo "Usage: $0 [command]"
+    echo ""
+    echo "Commands:"
+    echo "  help     Show this help message"
+    echo "  build    Build the Docker image"
+    echo "  start    Start the container"
+    echo "  enter    Enter the running container"
+    echo "  stop     Stop the container"
+    echo ""
+    echo "Examples:"
+    echo "  $0 build    Build image from Dockerfile"
+    echo "  $0 start    Start container"
+    echo "  $0 enter    Enter the running container"
+    echo "  $0 stop     Stop the container"
+}
+
+build_image() {
+    echo ">>> Building Docker image..."
+    docker build -f "${SCRIPT_DIR}/Dockerfile" \
+        -t atlas_hand:latest \
+        "$(dirname "${SCRIPT_DIR}")"
+}
+
+setup_x11() {
+    if [ -n "$DISPLAY" ]; then
+        echo "Setting up X11 forwarding..."
+        xhost +local:docker || true
+    else
+        echo "Warning: DISPLAY is not set. X11 forwarding will not be available."
+    fi
+}
+
+start_container() {
+    setup_x11
+
+    echo "Starting atlas_hand container..."
+    docker compose -f "${SCRIPT_DIR}/docker-compose.yml" up -d
+}
+
+enter_container() {
+    setup_x11
+
+    if ! docker ps | grep -q "$CONTAINER_NAME"; then
+        echo "Error: Container is not running. Run '$0 start' first."
+        exit 1
+    fi
+
+    docker exec -it "$CONTAINER_NAME" bash
+}
+
+stop_container() {
+    if ! docker ps | grep -q "$CONTAINER_NAME"; then
+        echo "Error: Container is not running."
+        exit 1
+    fi
+
+    echo "Warning: This will stop and remove the container. All unsaved data will be lost."
+    read -p "Are you sure? [y/N] " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        docker compose -f "${SCRIPT_DIR}/docker-compose.yml" down
+    else
+        echo "Operation cancelled."
+        exit 0
+    fi
+}
 
 case "$1" in
-
-  build)
-    echo ">>> 이미지 빌드 (--no-cache)"
-    docker build --no-cache -f "${SCRIPT_DIR}/Dockerfile" \
-      -t "$IMAGE" "$REPO_ROOT"
-    ;;
-
-  enter)
-    CONTAINER="atlas_hand_dev"
-    
-    if docker ps -q -f name="^${CONTAINER}$" | grep -q .; then
-      docker exec -it \
-        -e FASTDDS_BUILTIN_TRANSPORTS="${FASTDDS_TRANSPORT}" \
-        "$CONTAINER" bash
-    else
-      docker run --rm -it --name "$CONTAINER" \
-        --ipc=host \
-        --network host \
-        -e FASTDDS_BUILTIN_TRANSPORTS="${FASTDDS_TRANSPORT}" \
-        -e DISPLAY=:0 \
-        -v /:/host \
-        -v /tmp/.X11-unix:/tmp/.X11-unix \
-        -v "$REPO_ROOT:$COLCON_WS/src/atlas_hand" \
-        --privileged \
-        "$IMAGE" bash
-    fi
-    ;;
-
-  *)
-    echo "사용법: $0 {build | enter}"
-    exit 1
-    ;;
-
+    "help")  show_help ;;
+    "build") build_image ;;
+    "start") start_container ;;
+    "enter") enter_container ;;
+    "stop")  stop_container ;;
+    *)
+        echo "Error: Unknown command '${1:-}'"
+        show_help
+        exit 1
+        ;;
 esac
