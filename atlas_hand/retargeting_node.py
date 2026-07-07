@@ -15,7 +15,12 @@ from rclpy.node import Node
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float32MultiArray
 
-from atlas_hand_core.config import CONTROL_TIMER_SEC, POSITION_WEIGHT, VECTOR_WEIGHT
+from atlas_hand_core.config import (
+    AGA_SENSOR_COUNT,
+    CONTROL_TIMER_SEC,
+    POSITION_WEIGHT,
+    VECTOR_WEIGHT,
+)
 from atlas_hand_core.retargeter import HandRetargeter
 
 _HUMAN_JOINT_NAMES = [
@@ -66,8 +71,14 @@ class RetargetingNode(Node):
         self.get_logger().info(f"Node Ready | hand={hand_type} | robot_config={config_name}")
 
     def _quat_callback(self, msg: Float32MultiArray):
-        if len(msg.data) == 68:
-            self.latest_quats = np.array(msg.data).reshape(17, 4)
+        expected = AGA_SENSOR_COUNT * 4
+        if len(msg.data) == expected:
+            self.latest_quats = np.array(msg.data).reshape(AGA_SENSOR_COUNT, 4)
+        else:
+            self.get_logger().warn(
+                f"쿼터니언 길이 불일치: {len(msg.data)} (기대 {expected}) — 프레임 무시",
+                throttle_duration_sec=1.0,
+            )
 
     def _control_loop(self):
         if self.latest_quats is None:

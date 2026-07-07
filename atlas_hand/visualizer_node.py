@@ -95,7 +95,7 @@ def main(args=None):
     rclpy.init(args=args)
 
     if mode != 'off':
-        print(f"Rerun Mode: {mode.upper()}")
+        rclpy.logging.get_logger('hand_visualizer').info(f"Rerun Mode: {mode.upper()}")
         rr.init(f"AGA Hand ({hand_type.upper()})", spawn=(mode == 'spawn'))
         if mode == 'connect':
             rr.serve_grpc()
