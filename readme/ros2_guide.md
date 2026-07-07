@@ -39,12 +39,18 @@ export FASTDDS_BUILTIN_TRANSPORTS=UDPv4
 
 ```bash
 cd ~/ros2_ws/src
-git clone <repo_url>
+git clone --recurse-submodules <repo_url>
 
 cd ~/ros2_ws
 pip install -r src/atlas_hand_ROS2/requirements.txt
 colcon build --packages-select atlas_hand
 source install/setup.bash
+```
+
+이미 클론한 경우 서브모듈을 별도로 초기화합니다.
+
+```bash
+git submodule update --init
 ```
 
 ---
@@ -57,7 +63,7 @@ source install/setup.bash
 # 호스트에서도 반드시 설정
 export FASTDDS_BUILTIN_TRANSPORTS=UDPv4
 
-# 기본 실행 (input_source=atlas, hand_type=both, robot_config=base)
+# 기본 실행 (input_source=atlas, hand_type=both, robot_config=base_hand)
 ros2 launch atlas_hand atlas_hand.launch.py
 
 # 입력 소스 선택
@@ -66,8 +72,8 @@ ros2 launch atlas_hand atlas_hand.launch.py input_source:=meta_quest
 
 # 옵션 조합 예시
 # hand_type    : left | right | both
-# robot_config : base | robotis_hx5 | orca_hand
-# input_source: atlas | meta_quest
+# robot_config : base_hand | orca_hand | robotis_hx5_d20 | allegro_hand | leap_hand | schunk_svh | tesollo_dg5f
+# input_source : atlas | meta_quest
 ros2 launch atlas_hand atlas_hand.launch.py hand_type:=right robot_config:=orca_hand input_source:=meta_quest
 ```
 
@@ -86,10 +92,10 @@ ros2 run atlas_hand retarget --ros-args -p hand_type:=right -p robot_config:=orc
 ros2 run atlas_hand visualizer left spawn    # 로컬 뷰어
 ros2 run atlas_hand visualizer left connect  # 외부 뷰어 연결
 
-# URDF 뷰어 (RViz2) — model: base | orca | robotis  /  side: left | right
+# URDF 뷰어 (RViz2) — model: CONFIG_REGISTRY 키 중 선택  /  side: left | right
 ros2 launch atlas_hand hand_view.launch.py
-ros2 launch atlas_hand hand_view.launch.py model:=orca    side:=right
-ros2 launch atlas_hand hand_view.launch.py model:=robotis side:=left
+ros2 launch atlas_hand hand_view.launch.py model:=orca_hand       side:=right
+ros2 launch atlas_hand hand_view.launch.py model:=robotis_hx5_d20 side:=left
 ```
 
 ### 토픽 확인
@@ -133,7 +139,7 @@ ros2 topic pub --once /left_hand/haptic/off std_msgs/msg/Empty "{}"
 | 파라미터          | 기본값         | 설명                                                |
 | ----------------- | -------------- | --------------------------------------------------- |
 | `hand_type`       | `left`         | `left` / `right`                                    |
-| `robot_config`    | `base`         | `base` / `robotis_hx5` / `orca_hand`               |
+| `robot_config`    | `base_hand`    | `base_hand` / `orca_hand` / `robotis_hx5_d20` / `allegro_hand` / `leap_hand` / `schunk_svh` / `tesollo_dg5f` |
 | `vector_weight`   | `1.0`          | Stage 1 시간 비중 (VectorOptimizer)                 |
 | `position_weight` | `4.0`          | Stage 2 시간 비중 (PositionOptimizer)               |
 | `tf_parent_frame` | *(wrist link)* | TF parent frame                                     |

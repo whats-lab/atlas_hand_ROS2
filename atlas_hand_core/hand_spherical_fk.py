@@ -7,13 +7,16 @@ HandSphericalFK: Pinocchio spherical joint 기반 Hand FK
 입력 쿼터니언: [x, y, z, w] (scipy 표준)
 """
 
+import logging
 import os
 import xml.etree.ElementTree as ET
 
 import numpy as np
 import pinocchio as pin
-    
+
 from scipy.spatial.transform import Rotation as ScipyR
+
+logger = logging.getLogger(__name__)
 
 
 # ─────────────────────────────────────────────
@@ -112,7 +115,7 @@ def build_model(urdf_path: str, hand_type: str = 'left') -> 'pin.Model':
             pin.SE3.Identity(),
         )
         return jid
-    print(joints)
+
     # ── Thumb (4 joints + 1 tip) ──────────────────────────────────────────
     cmc0_id  = add_sph(UNIVERSE, 'thumb_cmc0',  joints[f'{pfx}thumb_cmc0'])
     cmc1_id  = add_sph(cmc0_id,  'thumb_cmc1',  joints[f'{pfx}thumb_cmc1_x'])
@@ -172,7 +175,7 @@ class HandSphericalFK:
                 share_dir = get_package_share_directory('atlas_hand')
             except Exception:
                 share_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
-            urdf_path = os.path.join(share_dir, 'models', 'base', 'urdf', f'{self.hand_type}.urdf')
+            urdf_path = os.path.join(share_dir, 'models', 'base_hand', 'urdf', f'{self.hand_type}.urdf')
         
         self.model = build_model(urdf_path, self.hand_type)
         self.data  = self.model.createData()
@@ -200,9 +203,9 @@ class HandSphericalFK:
             22: self.pfx + 'pinky_tip',
         }
 
-        print(f"[HandSphericalFK] {hand_type} hand loaded")
-        print(f"  njoints={self.model.njoints}, nq={self.model.nq}")
-        print(f"  joints: {list(self.model.names[1:])}")
+        logger.info("[HandSphericalFK] %s hand loaded (njoints=%d, nq=%d)",
+                    hand_type, self.model.njoints, self.model.nq)
+        logger.debug("  joints: %s", list(self.model.names[1:]))
 
     # ─────────────────────────────────────────
     def sensor_to_q(self, sensor_quats_17: np.ndarray) -> np.ndarray:
@@ -364,7 +367,7 @@ class HandRerunViz:
                 _pkg_share = os.path.join(os.path.dirname(__file__), '..', '..')
             filename = filename.replace('package://atlas_hand/', _pkg_share + '/')
             if not os.path.exists(filename):
-                print(f"[WARN] 메쉬 없음: {filename}")
+                logger.warning("메쉬 없음: %s", filename)
                 continue
 
             scale = [float(s) for s in mesh_elem.get('scale', '1 1 1').split()]
@@ -407,7 +410,7 @@ class HandRerunViz:
 
             n_logged += 1
 
-        print(f"[HandRerunViz] 메쉬 등록 완료 ({n_logged}개 링크, 손목 포함)")
+        logger.info("[HandRerunViz] 메쉬 등록 완료 (%d개 링크, 손목 포함)", n_logged)
 
     # ─────────────────────────────────────────
     def update(self, sensor_quats_17: np.ndarray, timestamp: float = None):

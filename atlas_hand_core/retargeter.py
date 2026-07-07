@@ -8,16 +8,19 @@ Hand 리타겟팅 파이프라인 코어 (ROS2 비의존)
     joint_angles = retargeter.compute(sensor_quats_17)  # shape (17, 4)
 """
 
+import logging
 import sys
 from typing import List, Union
 
 import numpy as np
 from scipy.spatial.transform import Rotation as ScipyR
 
+logger = logging.getLogger(__name__)
+
 try:
     from dex_retargeting.retargeting_config import RetargetingConfig
 except ImportError as e:
-    print(f"[ERROR] dex_retargeting 없음: {e}")
+    logger.error("dex_retargeting 없음: %s", e)
     sys.exit(1)
 
 from atlas_hand_core.config import (
@@ -40,7 +43,7 @@ class HandRetargeter:
     def __init__(
         self,
         hand_type: str,
-        config_name: str = 'base',
+        config_name: str = 'base_hand',
         vector_weight: float = VECTOR_WEIGHT,
         position_weight: float = POSITION_WEIGHT,
     ):
@@ -72,9 +75,10 @@ class HandRetargeter:
         s2_dict.update({'normal_delta': NORM_DELTA, 'huber_delta': HUBER_DELTA})
 
         cfg1 = RetargetingConfig.from_dict(s1_dict)
-        cfg2 = RetargetingConfig.from_dict(s2_dict)
         self._seq_stage1 = cfg1.build()
         self._seq_stage1.optimizer.opt.set_maxtime(stage1_time)
+        
+        cfg2 = RetargetingConfig.from_dict(s2_dict)
         self._seq_stage2 = cfg2.build()
         self._seq_stage2.optimizer.opt.set_maxtime(stage2_time)
 
@@ -98,6 +102,8 @@ class HandRetargeter:
 
         Returns:
             np.ndarray: len(joint_names) 크기의 조인트 각도 배열
+        Side-effect:
+            self.last_human_positions 에 변환 후 human 포지션 저장 (TF 발행용)
         """
         positions          = self.fk.compute_positions(sensor_quats_17)
         positions_centered = positions - positions[0]
@@ -107,6 +113,8 @@ class HandRetargeter:
             positions_robot *= self._scale_array[:, None]
         elif self._scale_factor != 1.0:
             positions_robot *= self._scale_factor
+
+        self.last_human_positions = positions_robot  # TF 발행용
 
         robot_qpos = self._two_stage_retarget(positions_robot)
 

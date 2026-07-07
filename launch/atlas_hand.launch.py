@@ -1,7 +1,7 @@
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.conditions import IfCondition
-from launch.substitutions import LaunchConfiguration, PythonExpression
+from launch.substitutions import LaunchConfiguration, OrSubstitution, EqualsSubstitution
 from launch_ros.actions import Node
 
 
@@ -15,13 +15,13 @@ def generate_launch_description():
 
     robot_config_arg = DeclareLaunchArgument(
         'robot_config',
-        default_value='base',
+        default_value='base_hand',
         description='로봇 설정',
     )
 
-    hand_type   = LaunchConfiguration('hand_type')
-    launch_left  = PythonExpression(["'", hand_type, "' in ['left',  'both']"])
-    launch_right = PythonExpression(["'", hand_type, "' in ['right', 'both']"])
+    hand_type    = LaunchConfiguration('hand_type')
+    launch_left  = OrSubstitution(EqualsSubstitution(hand_type, 'left'),  EqualsSubstitution(hand_type, 'both'))
+    launch_right = OrSubstitution(EqualsSubstitution(hand_type, 'right'), EqualsSubstitution(hand_type, 'both'))
     
     robot_type = LaunchConfiguration('robot_config')
     
