@@ -32,7 +32,7 @@ from atlas_hand_core.sources import create_source
 
 def _parse_args():
     hand_type   = 'left'
-    config_name = 'base'
+    config_name = 'base_hand'
     source_type = 'atlas'
     if len(sys.argv) > 1:
         hand_type = 'right' if sys.argv[1].lower() in ('right', 'r') else 'left'

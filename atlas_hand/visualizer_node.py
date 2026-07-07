@@ -41,7 +41,7 @@ class HandVisualizerNode(Node):
             self.get_logger().error(f"Failed to find atlas_hand package share: {e}")
             pkg_share = "."
             
-        urdf_path = os.path.join(pkg_share, 'models', 'base', 'urdf', f'{self.hand_type}.urdf')
+        urdf_path = os.path.join(pkg_share, 'models', 'base_hand', 'urdf', f'{self.hand_type}.urdf')
 
         if not os.path.exists(urdf_path):
             self.get_logger().warn(f"URDF path not found: {urdf_path}")
@@ -95,7 +95,7 @@ def main(args=None):
     rclpy.init(args=args)
 
     if mode != 'off':
-        print(f"Rerun Mode: {mode.upper()}")
+        rclpy.logging.get_logger('hand_visualizer').info(f"Rerun Mode: {mode.upper()}")
         rr.init(f"AGA Hand ({hand_type.upper()})", spawn=(mode == 'spawn'))
         if mode == 'connect':
             rr.serve_grpc()
