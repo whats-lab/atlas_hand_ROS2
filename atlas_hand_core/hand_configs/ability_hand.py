@@ -21,57 +21,54 @@ class AbilityHandConfig(HandConfig):
     ])
     _SCALE_FACTOR = [0.65, 1.03, 1.06, 1.06, 1.05]
     
-    _FINGERS: ClassVar[Dict[str, List[FingerChain]]] = {
-        "right": [],
-         
-        "left": [
-            FingerChain(  # Thumb (no TIP_OFFSET yet)
-                links=[
-                    "{wrist}",
-                    "thumb_base"
-                    "thumb_L1",
-                    "thumb_L2",
-                    "thumb_tip",
-                ],
-                human=[0, 1,2, 3, 4],
-            ),
-            
-            FingerChain(  # Index
-                links=[
-                    "{wrist}",
-                    "index_L1",
-                    "index_L2",
-                    "index_tip",
-                ],
-                human=[0, 6, 7, 8],
-            ),
-            FingerChain(  # Middle
-                links=[
-                    "{wrist}",
-                    "middle_L1",
-                    "middle_L2",
-                    "middle_tip",
-                ],
-                human=[0, 10, 11, 12],
-            ),
-            FingerChain(  # Ring
-                links=[
-                    "{wrist}",
-                    "ring_L1",
-                    "ring_L2",
-                    "ring_tip",
-                ],
-                human=[0, 14, 15, 16],
-            ),
-            FingerChain(  # Pinky
-                links=[
-                    "{wrist}",
-                    "pinky_L1",
-                    "pinky_L2",
-                    "pinky_tip",
-                ],
-                human=[0, 19, 20, 21],
-            ),
-        ],
-    }
+    # 좌/우 링크명이 동일 → 체인 공용
+    _chains = [
+        FingerChain(  # Thumb
+            links=[
+                "{wrist}",
+                "thumb_base",
+                "thumb_L1",
+                "thumb_L2",
+                "thumb_tip",
+            ],
+            human=[0, 1, 2, 3, 4],
+        ),
+        FingerChain(  # Index
+            links=[
+                "{wrist}",
+                "index_L1",
+                "index_L2",
+                "index_tip",
+            ],
+            human=[0, 6, 7, 8],
+        ),
+        FingerChain(  # Middle
+            links=[
+                "{wrist}",
+                "middle_L1",
+                "middle_L2",
+                "middle_tip",
+            ],
+            human=[0, 10, 11, 12],
+        ),
+        FingerChain(  # Ring
+            links=[
+                "{wrist}",
+                "ring_L1",
+                "ring_L2",
+                "ring_tip",
+            ],
+            human=[0, 14, 15, 16],
+        ),
+        FingerChain(  # Pinky
+            links=[
+                "{wrist}",
+                "pinky_L1",
+                "pinky_L2",
+                "pinky_tip",
+            ],
+            human=[0, 19, 20, 21],
+        ),
+    ]
+    _FINGERS: ClassVar[Dict[str, List[FingerChain]]] = {"left": _chains, "right": _chains}
 

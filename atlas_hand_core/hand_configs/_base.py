@@ -85,7 +85,8 @@ class HandConfig(ABC):
     _WRIST_JOINTS:         ClassVar[Dict[str, Dict[str, List[float]]]] = {'left': {}, 'right': {}}
     _RVIZ_FILENAME:        ClassVar[Dict[str, str]]                    = {}
     # mimic joint가 있는 URDF에서 실제 제어 가능한 joint만 명시. 비어있으면 자동 탐색.
-    _TARGET_JOINT_NAMES:   ClassVar[List[str]]                         = []
+    # 좌우 joint명이 다르면(예: {side}_hand_ 접두어) dict로 지정 가능.
+    _TARGET_JOINT_NAMES:   ClassVar[Union[List[str], Dict[str, List[str]]]] = []
 
     def __init__(self):
         share_dir = _get_package_share()
@@ -124,9 +125,12 @@ class HandConfig(ABC):
             'target_link_human_indices': [f.human[-1] for f in fingers],
             'low_pass_alpha': -1.0,
         }
-        if self._TARGET_JOINT_NAMES:
-            stage1['target_joint_names'] = self._TARGET_JOINT_NAMES
-            stage2['target_joint_names'] = self._TARGET_JOINT_NAMES
+        target_joints = self._TARGET_JOINT_NAMES
+        if isinstance(target_joints, dict):
+            target_joints = target_joints.get(hand_type, [])
+        if target_joints:
+            stage1['target_joint_names'] = target_joints
+            stage2['target_joint_names'] = target_joints
         return stage1, stage2
 
     def get_coord_transform(self, _hand_type: str) -> np.ndarray:

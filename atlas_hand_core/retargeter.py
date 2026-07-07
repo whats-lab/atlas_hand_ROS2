@@ -8,16 +8,19 @@ Hand 리타겟팅 파이프라인 코어 (ROS2 비의존)
     joint_angles = retargeter.compute(sensor_quats_17)  # shape (17, 4)
 """
 
+import logging
 import sys
 from typing import List, Union
 
 import numpy as np
 from scipy.spatial.transform import Rotation as ScipyR
 
+logger = logging.getLogger(__name__)
+
 try:
     from dex_retargeting.retargeting_config import RetargetingConfig
 except ImportError as e:
-    print(f"[ERROR] dex_retargeting 없음: {e}")
+    logger.error("dex_retargeting 없음: %s", e)
     sys.exit(1)
 
 from atlas_hand_core.config import (
@@ -128,7 +131,6 @@ class HandRetargeter:
     def _two_stage_retarget(self, positions_robot: np.ndarray) -> np.ndarray:
         ref_vec     = positions_robot[self._s1_task_idx] - positions_robot[self._s1_origin_idx]
         stage1_qpos = self._seq_stage1.retarget(ref_vec)
-        # return stage1_qpos
         self._seq_stage2.set_qpos(stage1_qpos)
         return self._seq_stage2.retarget(positions_robot[self._s2_tip_idx])
 
