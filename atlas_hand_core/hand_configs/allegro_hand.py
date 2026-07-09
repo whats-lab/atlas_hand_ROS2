@@ -11,15 +11,15 @@ class AllegroHandConfig(HandConfig):
     손가락 배치: Index=link_8~11 / Middle=link_4~7 / Ring=link_0~3 /
     Thumb=link_12~15 (새끼손가락 없음).
 
-    IK 기준(원점): base_link. base_link가 URDF root이자 원점이고 모든 손가락
-    joint가 여기 직접 붙는 실제 손 중심이다. (`wrist` 링크는 palm 아래 z=-0.095
-    로 떨어진 팔뚝 플랜지라 기준으로 부적합.)
+    IK 기준(원점): palm. 인체 손목 키포인트에 대응하는 손 중심 링크.
+    URDF root(base_link)에서 z=-0.065 떨어져 있어, retargeter의 wrist_offset이
+    이 값을 반영해 human 타깃을 palm에 앵커한다.
     """
 
     _MODEL_SUBDIR  = "allegro_hand"
     _URDF_FILENAME = "allegro_hand_{hand_type}.urdf"
     _RVIZ_FILENAME = {"left": "allegro_hand.rviz", "right": "allegro_hand.rviz"}
-    _WRIST_LINK    = {"left": "base_link", "right": "base_link"}
+    _WRIST_LINK    = {"left": "palm", "right": "palm"}
 
     _COORD_TRANSFORM: ClassVar[np.ndarray] = np.array(
         [[0, 1, 0], [0, 0, 1], [1, 0, 0]], dtype=np.float32

@@ -98,13 +98,19 @@ class RetargetingNode(Node):
         self._pub.publish(msg)
 
     def _broadcast_human_tf(self, positions: np.ndarray):
+        # 사람 손과 로봇 손은 링크 길이가 달라 중간 관절은 로봇 링크에 얹히지 않는다.
+        # IK가 실제로 위치를 맞추는 손가락 팁만 wrist 링크 기준으로 발행 → 로봇 팁과 직접 비교.
         now        = self.get_clock().now().to_msg()
         transforms = []
-        for i, pos in enumerate(positions[:len(_HUMAN_JOINT_NAMES)]):
-            t                       = TransformStamped()
-            t.header.stamp          = now
-            t.header.frame_id       = self._tf_parent_frame
-            t.child_frame_id        = f'human_{self.hand_type}_{_HUMAN_JOINT_NAMES[i]}'
+        # wrist(0) + 팁: wrist 마커로 앵커 위치(=wrist 링크 원점)를 눈으로 검증.
+        for i in [0, *self.retargeter.tip_human_indices]:
+            if i >= len(_HUMAN_JOINT_NAMES):
+                continue
+            pos                       = positions[i]
+            t                         = TransformStamped()
+            t.header.stamp            = now
+            t.header.frame_id         = self._tf_parent_frame
+            t.child_frame_id          = f'human_{self.hand_type}_{_HUMAN_JOINT_NAMES[i]}'
             t.transform.translation.x = float(pos[0])
             t.transform.translation.y = float(pos[1])
             t.transform.translation.z = float(pos[2])
