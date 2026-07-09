@@ -26,9 +26,9 @@ input_source 파라미터로 소스를 선택합니다.
   target_ip   (str)  : 디바이스 IP        (기본값: "127.0.0.1")
   client_port (int)  : 하트비트 송신 포트  (기본값: 4042)
 
-  [Meta Quest]
-  listen_ip   (str)  : UDP 바인드 IP      (기본값: "0.0.0.0")
-  udp_port    (int)  : UDP 데이터 포트    (기본값: 9090)
+  [Meta Quest]  (신 APK / OSC)
+  listen_ip   (str)  : OSC 바인드 IP      (기본값: "0.0.0.0")
+  osc_port    (int)  : OSC 데이터 포트    (기본값: 9000)
   disc_port   (int)  : 자동 발견 포트     (기본값: 9001)
 
   verbose     (bool) : 상세 로그          (기본값: False)
