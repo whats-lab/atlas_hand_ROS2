@@ -11,9 +11,9 @@ OSC_TARGET_IP            = "127.0.0.1"
 HEARTBEAT_INTERVAL_SEC   = 1.0
 HAPTIC_PING_INTERVAL_SEC = 2.0
 
-# ── UDP 네트워크 (Meta Quest) ─────────────────────────────────────────
-QUEST_UDP_PORT  = 9090
-QUEST_DISC_PORT = 9001
+# ── OSC 네트워크 (Meta Quest, 신 APK / questTracker) ──────────────────
+QUEST_OSC_PORT  = 9000   # OSC 데이터 수신 포트 (자동 발견 시 이 포트를 APK 에 알림)
+QUEST_DISC_PORT = 9001   # 자동 발견(MXFIND→MXHELLO) 포트
 
 # ── AGA 센서 데이터 포맷 ──────────────────────────────────────────────
 AGA_JOINT_COUNT     = 18

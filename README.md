@@ -22,7 +22,7 @@ Pinocchio 기반 Forward Kinematics → dex-retargeting IK 파이프라인으로
 | 소스 | 프로토콜 | 햅틱 피드백 |
 | ---- | -------- | ----------- |
 | **AGA 글러브** (Atlas) | OSC UDP | ✅ |
-| **Meta Quest** | Binary UDP | ❌ |
+| **Meta Quest** | OSC UDP | ❌ |
 
 #### AGA 글러브 연결
 
@@ -30,9 +30,21 @@ AGA 글러브는 [WHATsLAB 공식 사이트](https://www.whatslab.co.kr/)에서 
 
 #### Meta Quest 연결
 
-1. [`readme/HandTrackingData.apk`](readme/HandTrackingData.apk)를 Meta Quest 헤드셋에 설치합니다.
+Meta Quest 입력은 **OSC 프로토콜**로 수신합니다(신 APK). 수신·파싱은 questTracker 계층이
+담당하며 `atlas_hand_core/sources/meta_quest.py`(`MetaQuestSource`)에 통합되어 있습니다.
+파싱 계층 상세는 [`readme/questTracker.md`](readme/questTracker.md) 참고.
+
+1. [`readme/PoseDataTracker 1.0.0.apk`](readme/PoseDataTracker%201.0.0.apk)를 Meta Quest 헤드셋에 설치합니다.
 2. PC와 Meta Quest를 **같은 Wi-Fi**에 연결합니다.
 3. Meta Quest에서 앱을 실행하면 MXFIND 브로드캐스트로 PC를 자동 발견하여 연결됩니다.
+
+전송되는 OSC 주소(좌표는 모두 HMD 로컬):
+
+| 주소 | 페이로드 |
+| ---- | -------- |
+| `/hand/<left\|right>/pos` · `/rot` | 손목(root) 위치(3) · 회전(4) |
+| `/hand/<left\|right>/joints/pos` · `/rot` | 16관절 위치(48) · 회전(64) |
+| `/controller/<left\|right>/pos` · `/rot` | 컨트롤러 위치(3) · 회전(4) |
 
 ### 실행 모드
 
@@ -48,13 +60,13 @@ AGA 글러브는 [WHATsLAB 공식 사이트](https://www.whatslab.co.kr/)에서 
 ```
 [AGA 글러브]  OSC UDP  ┐
                        ├→ HandInputSource → Hand Forward Kinematics → HandRetargeter → [Robot Hand]
-[Meta Quest]  UDP     ┘
+[Meta Quest]  OSC UDP ┘
 ```
 
 ```
 atlas_hand_core/sources/
 ├── AtlasGloveSource  — OSC 수신, 하트비트, 햅틱 송신
-└── MetaQuestSource   — Binary UDP 수신
+└── MetaQuestSource   — OSC 수신 (questTracker 통합), 자동 발견
 
 atlas_hand_core/
 ├── HandRetargeter    — FK (Pinocchio) → IK (dex-retargeting)
@@ -84,7 +96,7 @@ atlas_hand_ROS2/
 │       ├── __init__.py                   # create_source() 팩토리
 │       ├── base.py                       # HandInputSource ABC
 │       ├── atlas_glove.py               # AtlasGloveSource (OSC)
-│       └── meta_quest.py                # MetaQuestSource (Binary UDP)
+│       └── meta_quest.py                # MetaQuestSource (OSC, questTracker 통합)
 │
 ├── standalone/                           # ROS 2 없이 실행 가능한 스크립트
 │   ├── visualize.py                      # 입력 소스 → Rerun 3D 시각화
