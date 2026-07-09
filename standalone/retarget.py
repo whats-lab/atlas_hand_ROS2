@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 import numpy as np
 
-from atlas_hand_core.config import OSC_CLIENT_PORT, OSC_LISTEN_IP, OSC_SERVER_PORT, OSC_TARGET_IP, QUEST_DISC_PORT, QUEST_UDP_PORT
+from atlas_hand_core.config import OSC_CLIENT_PORT, OSC_LISTEN_IP, OSC_SERVER_PORT, OSC_TARGET_IP, QUEST_DISC_PORT, QUEST_OSC_PORT
 from atlas_hand_core.hand_configs import CONFIG_REGISTRY
 from atlas_hand_core.retargeter import HandRetargeter
 from atlas_hand_core.sources import create_source
@@ -77,7 +77,7 @@ def main():
     elif source_type == 'meta_quest':
         source_kwargs = dict(
             listen_ip='0.0.0.0',
-            udp_port=QUEST_UDP_PORT,
+            osc_port=QUEST_OSC_PORT,
             disc_port=QUEST_DISC_PORT,
         )
     else:
