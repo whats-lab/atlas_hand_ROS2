@@ -26,7 +26,7 @@ import numpy as np
 import rerun as rr
 import rerun.blueprint as rrb
 
-from atlas_hand_core.config import OSC_CLIENT_PORT, OSC_LISTEN_IP, OSC_SERVER_PORT, OSC_TARGET_IP, QUEST_DISC_PORT, QUEST_UDP_PORT
+from atlas_hand_core.config import OSC_CLIENT_PORT, OSC_LISTEN_IP, OSC_SERVER_PORT, OSC_TARGET_IP, QUEST_DISC_PORT, QUEST_OSC_PORT
 from atlas_hand_core.hand_spherical_fk import HandRerunViz
 from atlas_hand_core.sources import create_source
 
@@ -87,7 +87,7 @@ def main():
     elif source_type == 'meta_quest':
         source_kwargs = dict(
             listen_ip='0.0.0.0',
-            udp_port=QUEST_UDP_PORT,
+            osc_port=QUEST_OSC_PORT,
             disc_port=QUEST_DISC_PORT,
         )
     else:

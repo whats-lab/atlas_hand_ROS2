@@ -17,8 +17,8 @@ def create_source(source_type: str, **kwargs) -> HandInputSource:
         listen_ip, server_port, target_ip, client_port,
         on_left_quat, on_right_quat, on_status_change, verbose
 
-    Meta Quest (MetaQuestSource):
-        listen_ip, udp_port, disc_port,
+    Meta Quest (MetaQuestSource, 신 APK / OSC):
+        listen_ip, osc_port, disc_port,
         on_left_quat, on_right_quat, on_status_change, verbose
     """
     if source_type == 'atlas':
