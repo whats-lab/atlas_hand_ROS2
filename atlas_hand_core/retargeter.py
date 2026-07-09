@@ -86,6 +86,8 @@ class HandRetargeter:
         self._s1_origin_idx = s1_human[0].astype(np.int32)
         self._s1_task_idx   = s1_human[1].astype(np.int32)
         self._s2_tip_idx    = np.array(cfg2.target_link_human_indices, dtype=np.int32)
+        # IK가 실제로 위치를 맞추는 손가락 팁의 human 인덱스 (TF 시각화용)
+        self.tip_human_indices = self._s2_tip_idx.tolist()
 
         robot               = self._seq_stage1.optimizer.robot
         self.joint_names    = list(robot.dof_joint_names)
@@ -94,6 +96,16 @@ class HandRetargeter:
 
         wrist_cfg          = config._WRIST_JOINTS.get(self.hand_type, {})
         self._wrist_joints = list(wrist_cfg.keys())
+
+        # wrist 링크의 URDF root 프레임 기준 위치 (root에 fixed → 상수).
+        # PositionOptimizer는 로봇 팁을 root 프레임에서 비교하므로, wrist 기준인
+        # human 타깃을 이 오프셋만큼 이동시켜 같은 space에서 IK를 풀게 한다.
+        try:
+            widx = robot.get_link_index(config.get_wrist_link_name(self.hand_type))
+            robot.compute_forward_kinematics(robot.q0)
+            self._wrist_offset = robot.get_link_pose(widx)[:3, 3].astype(np.float64).copy()
+        except Exception:
+            self._wrist_offset = np.zeros(3, dtype=np.float64)
 
     # ─────────────────────────────────────────
 
@@ -114,9 +126,12 @@ class HandRetargeter:
         elif self._scale_factor != 1.0:
             positions_robot *= self._scale_factor
 
-        self.last_human_positions = positions_robot  # TF 발행용
+        self.last_human_positions = positions_robot  # wrist 기준 (TF 발행용)
 
-        robot_qpos = self._two_stage_retarget(positions_robot)
+        # IK는 URDF root 프레임에서 계산 (로봇 팁 위치와 같은 space).
+        # vector stage는 상대벡터라 오프셋이 상쇄되고, position stage만 정합됨.
+        positions_ik = positions_robot + self._wrist_offset
+        robot_qpos = self._two_stage_retarget(positions_ik)
 
         if self._fixed_indices:
             robot_qpos[self._fixed_indices] = 0.0
