@@ -1,3 +1,4 @@
+⚠️ This repo is superseded by whatslab-sdk (https://github.com/whats-lab/whatslab-sdk) + whatslab-ros2 (https://github.com/whats-lab/whatslab-ros2). Kept for reference.
 # atlas_hand
 
 핸드 데이터를 수신하여 로봇 손을 실시간으로 제어하는 패키지입니다.
